@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from .models import Address
 
 User = get_user_model()
 
@@ -32,3 +33,14 @@ class ForgotPasswordSerializer(serializers.Serializer):
 class ResetPasswordSerializer(serializers.Serializer):
     token = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = (
+            'id', 'full_name', 'phone', 'house_no', 'street', 
+            'landmark', 'city', 'state', 'pincode', 'country', 
+            'is_default', 'created_at', 'updated_at'
+        )
+        read_only_fields = ('id', 'created_at', 'updated_at')
+

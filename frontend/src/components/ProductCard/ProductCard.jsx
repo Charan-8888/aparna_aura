@@ -1,0 +1,231 @@
+import React, { useRef, useState, useEffect, useCallback, memo } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Heart, ShoppingBag, Eye } from 'lucide-react';
+import { useWishlist } from '../../hooks/useWishlist';
+import { useCart } from '../../hooks/useCart';
+
+const formatPrice = (price) => `₹${Number(price || 0).toLocaleString('en-IN')}`;
+
+const ProductCard = memo(({ product, index = 0 }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [cartLoading, setCartLoading] = useState(false);
+  const videoRef = useRef(null);
+  const cardRef = useRef(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const { isWishlisted, toggleWishlist } = useWishlist();
+  const { addToCart } = useCart();
+
+  const wishlisted = isWishlisted(product.id);
+
+  // Intersection Observer for lazy loading
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '100px' }
+    );
+    if (cardRef.current) observer.observe(cardRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // Handle video play/pause on hover
+  useEffect(() => {
+    if (!videoRef.current || !product.video) return;
+    if (isHovered && isVisible) {
+      videoRef.current.play().catch(() => {});
+    } else {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  }, [isHovered, isVisible, product.video]);
+
+  const handleWishlistToggle = useCallback(async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await toggleWishlist(product.id, {
+      onRequireLogin: () => navigate('/login', { state: { from: location } }),
+    });
+  }, [product.id, toggleWishlist, navigate, location]);
+
+  const handleAddToCart = useCallback(async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (cartLoading) return;
+    setCartLoading(true);
+    try {
+      await addToCart(product.id, 1, {
+        onRequireLogin: () => navigate('/login', { state: { from: location } }),
+      });
+    } catch {
+      // Error already logged in context
+    } finally {
+      setCartLoading(false);
+    }
+  }, [product.id, addToCart, cartLoading, navigate, location]);
+
+  const discount = product.discountPercentage || product.discount_percentage;
+  const isLowStock = product.stock <= 3;
+
+  return (
+    <motion.div
+      ref={cardRef}
+      initial={{ opacity: 0, y: 30 }}
+      animate={isVisible ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.5, delay: index * 0.08 }}
+      className="group relative bg-white rounded-[16px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-[#E6E1D8] transition-all duration-500 overflow-hidden flex flex-col"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <Link to={`/product/${product.slug}`} className="flex flex-col h-full">
+        {/* Image Container */}
+        <div className="relative aspect-[4/5] overflow-hidden bg-[var(--color-secondary-bg)]">
+          {/* Skeleton while loading */}
+          {!imageLoaded && (
+            <div className="absolute inset-0 shimmer" />
+          )}
+
+          {/* Main Image */}
+          {isVisible && (
+            <img
+              src={product.images?.[0] || product.image || 'https://images.unsplash.com/photo-1515562141589-67f0d6ce4819?w=800&h=800&fit=crop'}
+              alt={product.name}
+              loading="lazy"
+              onLoad={() => setImageLoaded(true)}
+              className={`w-full h-full object-cover transition-transform duration-700 ease-out ${
+                imageLoaded ? 'opacity-100' : 'opacity-0'
+              } ${isHovered && product.video ? 'opacity-0' : 'opacity-100 group-hover:scale-110'}`}
+            />
+          )}
+
+          {/* Video Overlay on Hover */}
+          {product.video && isVisible && (
+            <video
+              ref={videoRef}
+              src={product.video}
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+                isHovered ? 'opacity-100' : 'opacity-0'
+              }`}
+            />
+          )}
+
+          {/* Overlay Gradient on Hover */}
+          <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+          {/* Badges */}
+          <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
+            {discount > 0 && (
+              <span className="bg-[var(--color-accent)] text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded-[8px] shadow-sm tracking-wider">
+                -{discount}%
+              </span>
+            )}
+            {isLowStock && (
+              <span className="bg-red-500 text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded-[8px] shadow-sm tracking-wider">
+                Only {product.stock || 0} left
+              </span>
+            )}
+            {product.tags?.includes('new-arrival') && (
+              <span className="bg-[var(--color-brand)] text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded-[8px] shadow-sm tracking-wider">
+                New
+              </span>
+            )}
+          </div>
+
+          {/* Quick Actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={isHovered ? { opacity: 1, y: 0 } : { opacity: 0, y: 15 }}
+            transition={{ duration: 0.3 }}
+            className="absolute bottom-4 left-0 right-0 flex justify-center gap-3 z-10 px-4"
+          >
+            {/* Wishlist Toggle */}
+            <button
+              onClick={handleWishlistToggle}
+              className={`p-3 rounded-full shadow-lg backdrop-blur-md transition-all duration-300 transform hover:scale-110 ${
+                wishlisted
+                  ? 'bg-red-500 text-white'
+                  : 'bg-white/95 text-[var(--color-brand)] hover:bg-[var(--color-accent)] hover:text-white'
+              }`}
+              title={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+            >
+              <Heart size={18} fill={wishlisted ? 'currentColor' : 'none'} />
+            </button>
+
+            {/* Add to Cart */}
+            <button
+              onClick={handleAddToCart}
+              disabled={cartLoading}
+              className="px-5 py-3 rounded-full bg-white/95 text-[var(--color-brand)] shadow-lg backdrop-blur-md hover:bg-[var(--color-brand)] hover:text-white transition-all duration-300 disabled:opacity-60 font-semibold text-sm flex items-center gap-2 flex-1 justify-center transform hover:scale-105"
+              title="Add to cart"
+            >
+              {cartLoading ? (
+                <span className="block w-4 h-4 border-2 border-[var(--color-brand)]/30 border-t-[var(--color-brand)] group-hover:border-white/30 group-hover:border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <ShoppingBag size={18} /> Add
+                </>
+              )}
+            </button>
+          </motion.div>
+        </div>
+
+        {/* Product Info */}
+        <div className="p-5 flex flex-col flex-1 bg-white">
+          <p className="text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-widest mb-1.5">
+            {product.category}
+          </p>
+          <h3 className="text-[15px] font-medium text-[var(--color-brand)] line-clamp-1 group-hover:text-[var(--color-accent)] transition-colors duration-300 mb-2">
+            {product.name}
+          </h3>
+          
+          <div className="mt-auto">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-lg font-bold text-[var(--color-brand)] tracking-tight">
+                {formatPrice(product.price)}
+              </span>
+              {(product.originalPrice || product.original_price) > product.price && (
+                <span className="text-sm text-[var(--color-muted)] line-through">
+                  {formatPrice(product.originalPrice || product.original_price)}
+                </span>
+              )}
+            </div>
+            {/* Rating */}
+            <div className="flex items-center gap-1.5">
+              <div className="flex items-center">
+                {[...Array(5)].map((_, i) => (
+                  <svg
+                    key={i}
+                    className={`w-3.5 h-3.5 ${
+                      i < Math.floor(product.rating) ? 'text-[var(--color-accent)]' : 'text-[#E6E1D8]'
+                    }`}
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                ))}
+              </div>
+              <span className="text-xs text-[var(--color-muted)]">({product.reviewCount || 0})</span>
+            </div>
+          </div>
+        </div>
+      </Link>
+    </motion.div>
+  );
+});
+
+ProductCard.displayName = 'ProductCard';
+
+export default ProductCard;

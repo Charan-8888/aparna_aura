@@ -1,0 +1,192 @@
+import React, { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+import { APP_NAME } from '../constants/app';
+import Input from '../components/Input/Input';
+
+const Login = () => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname || '/';
+
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState('');
+
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required.';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Enter a valid email address.';
+    }
+    if (!formData.password) {
+      newErrors.password = 'Password is required.';
+    }
+    return newErrors;
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear field-level error on type
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
+    if (serverError) setServerError('');
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const validationErrors = validate();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setIsSubmitting(true);
+    setServerError('');
+
+    try {
+      await login(formData.email, formData.password);
+      navigate(from, { replace: true });
+    } catch (err) {
+      const data = err.response?.data;
+      if (data) {
+        if (data.detail) {
+          setServerError(data.detail);
+        } else if (data.non_field_errors) {
+          setServerError(data.non_field_errors[0]);
+        } else {
+          const fieldErrors = {};
+          Object.entries(data).forEach(([key, val]) => {
+            fieldErrors[key] = Array.isArray(val) ? val[0] : val;
+          });
+          setErrors(fieldErrors);
+        }
+      } else {
+        setServerError('Unable to connect. Please check your internet and try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-[80vh] flex items-center justify-center section-padding px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md"
+      >
+        {/* Header */}
+        <div className="text-center mb-10">
+          <Link to="/" className="inline-block mb-6">
+            <span
+              className="text-3xl font-bold tracking-wider text-[var(--color-brand)]"
+              style={{ fontFamily: '"Playfair Display", serif' }}
+            >
+              {APP_NAME}
+            </span>
+          </Link>
+          <h1 className="text-2xl font-bold text-[var(--color-brand)] mb-2">Welcome Back</h1>
+          <p className="text-[var(--color-muted)] text-sm">
+            Sign in to your account to continue your journey
+          </p>
+        </div>
+
+        {/* Card */}
+        <div className="premium-card p-8">
+          {/* Server Error Banner */}
+          {serverError && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 px-4 py-3 bg-red-50 border border-red-200 rounded-[12px] text-red-700 text-sm font-medium"
+            >
+              {serverError}
+            </motion.div>
+          )}
+
+          <form onSubmit={handleSubmit} noValidate className="space-y-5">
+            {/* Email */}
+            <Input
+              label="Email Address"
+              name="email"
+              type="email"
+              placeholder="you@example.com"
+              autoComplete="email"
+              icon={Mail}
+              value={formData.email}
+              onChange={handleChange}
+              error={errors.email}
+            />
+
+            {/* Password */}
+            <div className="relative">
+              <div className="absolute right-0 top-0 flex items-center h-5">
+                <Link
+                  to="/forgot-password"
+                  className="text-xs text-[var(--color-accent)] hover:text-[var(--color-brand)] transition-colors"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+              <Input
+                label="Password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Enter your password"
+                autoComplete="current-password"
+                icon={Lock}
+                value={formData.password}
+                onChange={handleChange}
+                error={errors.password}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((s) => !s)}
+                className="absolute right-3.5 top-[38px] text-[#8A8A8A] hover:text-[#382135] transition-colors"
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="btn-primary w-full mt-2"
+            >
+              {isSubmitting ? (
+                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  Sign In <ArrowRight size={18} className="ml-2" />
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+
+        {/* Footer Link */}
+        <p className="text-center text-sm text-[var(--color-muted)] mt-6">
+          Don't have an account?{' '}
+          <Link
+            to="/register"
+            className="text-[var(--color-accent)] font-semibold hover:text-[var(--color-brand)] transition-colors"
+          >
+            Create one
+          </Link>
+        </p>
+      </motion.div>
+    </div>
+  );
+};
+
+export default Login;

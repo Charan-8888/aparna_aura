@@ -1,25 +1,144 @@
 @import "tailwindcss";
 
 @theme {
-  --color-luxury-gold: #D4AF37;
-  --color-luxury-gold-light: #C5A059;
-  --color-obsidian: #111111;
-  --color-ivory: #FAF9F6;
+  --font-heading: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
+
+  /* Premium Luxury Palette */
+  --color-brand: #382135;
+  --color-brand-light: #4D2C48;
+  --color-brand-dark: #2a1827;
+  --color-accent: #C9A227;
+  --color-accent-light: #D4AF37; 
+  --color-accent-dark: #b5952f;
   
-  --font-heading: "Cormorant Garamond", serif;
-  --font-sans: "Inter", sans-serif;
+  --color-background: #FAF8F5;
+  --color-secondary-bg: #F3EFE8;
+  --color-surface: #FFFFFF;
+  --color-muted: #6F6F6F;
+  --color-border: #E6E1D8;
+  --color-text-main: #2C2C2C;
+  --color-dark-section: #121212;
 }
 
 @layer base {
-  body {
-    background-color: var(--color-ivory);
-    color: var(--color-obsidian);
-    font-family: var(--font-sans);
-    -webkit-font-smoothing: antialiased;
+  :root {
+    --brand: #382135;
+    --accent: #C9A227;
+    --background: #FAF8F5;
   }
-  
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #D4AF37 transparent;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text-main);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
-    color: var(--color-obsidian);
+    color: var(--color-brand);
+  }
+
+  img {
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  /* Global Container Constraints */
+  .container-default {
+    max-width: 1280px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+@layer utilities {
+  .section-padding {
+    padding-top: 30px;
+    padding-bottom: 30px;
+  }
+  
+  @media (min-width: 768px) {
+    .section-padding {
+      padding-top: 50px;
+      padding-bottom: 50px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .section-padding {
+      padding-top: 80px;
+      padding-bottom: 80px;
+    }
+  }
+
+  /* Typography */
+  .text-gradient {
+    background: linear-gradient(135deg, #382135 0%, #C9A227 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .bg-hero-gradient {
+    background: linear-gradient(135deg, #382135 0%, #4D2C48 50%, #382135 100%);
+  }
+
+  .glass {
+    background: rgba(250, 248, 245, 0.96);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  /* Shimmer Loading State - Luxury */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      #F3EFE8 25%,
+      #E6E1D8 50%,
+      #F3EFE8 75%
+    );
+    background-size: 200% 100%;
+    animation: luxury-shimmer 2s ease-in-out infinite;
+  }
+
+  @keyframes luxury-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Text Clamping */
+  .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+  .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+  .hide-scrollbar::-webkit-scrollbar { display: none; }
+  .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+@layer components {
+  /* Buttons */
+  .btn-primary {
+    @apply inline-flex items-center justify-center bg-[#382135] text-white font-semibold rounded-[12px] px-6 py-3 transition-all duration-300 shadow-md focus:outline-none focus:ring-2 focus:ring-[#C9A227] focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed hover:bg-[#4D2C48];
+  }
+  
+  .btn-secondary {
+    @apply inline-flex items-center justify-center bg-white text-[#382135] font-semibold rounded-[12px] px-6 py-3 border-2 border-[#E6E1D8] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#C9A227] focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed hover:border-[#D4AF37] hover:text-[#D4AF37];
+  }
+
+  /* Generic Card Styles */
+  .premium-card {
+    @apply bg-white rounded-[12px] shadow-sm border border-[#E6E1D8] transition-all duration-300 hover:shadow-xl overflow-hidden;
   }
 }
