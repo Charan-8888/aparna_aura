@@ -165,7 +165,7 @@ const OrderDetail = () => {
                 <div key={item.id} className="flex gap-4 sm:gap-6 border-b border-gray-100 pb-6 last:border-0 last:pb-0">
                   <Link to={`/product/${item.product?.slug}`} className="w-20 h-24 sm:w-24 sm:h-28 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-200">
                     <img 
-                      src={item.product?.images?.[0] || item.product?.image} 
+                      src={typeof item.product?.images?.[0] === 'object' ? item.product?.images?.[0]?.image : (item.product?.images?.[0] || item.product?.image)} 
                       alt={item.product?.name} 
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                     />

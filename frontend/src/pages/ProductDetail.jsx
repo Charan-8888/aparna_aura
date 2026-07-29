@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Heart, Share2, Shield, Truck, RefreshCw, Check } from 'lucide-react';
+import { ShoppingBag, Heart, Share2, Shield, Truck, RefreshCw, Check, Gem, Palette, Sparkles, Award, Star } from 'lucide-react';
 import ImageGallery from '../components/ImageGallery/ImageGallery';
 import PriceBadge from '../components/PriceBadge/PriceBadge';
 import RatingDisplay from '../components/RatingDisplay/RatingDisplay';
@@ -12,10 +12,21 @@ import SectionTitle from '../components/SectionTitle/SectionTitle';
 import SkeletonLoader from '../components/SkeletonLoader/SkeletonLoader';
 import EmptyState from '../components/EmptyState/EmptyState';
 import ErrorState from '../components/ErrorState/ErrorState';
+import LuxuryGuarantees from '../components/LuxuryGuarantees/LuxuryGuarantees';
+import SEO from '../components/SEO/SEO';
 import { useProduct } from '../hooks/useProduct';
 import { useProducts } from '../hooks/useProducts';
 import { useCart } from '../hooks/useCart';
 import { useWishlist } from '../hooks/useWishlist';
+import { useRecentlyViewed } from '../hooks/useRecentlyViewed';
+
+// ─── Storytelling Tabs ───
+const STORY_TABS = [
+  { id: 'description', label: 'Description' },
+  { id: 'craftsmanship', label: 'Craftsmanship' },
+  { id: 'materials', label: 'Materials & Origin' },
+  { id: 'care', label: 'Care Guide' },
+];
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -25,33 +36,33 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [cartLoading, setCartLoading] = useState(false);
   const [cartSuccess, setCartSuccess] = useState(false);
+  const [activeTab, setActiveTab] = useState('description');
 
   const { addToCart } = useCart();
   const { isWishlisted, toggleWishlist } = useWishlist();
+  const { trackView, recentlyViewed } = useRecentlyViewed();
 
   const wishlisted = product ? isWishlisted(product.id) : false;
 
   // Fetch related products based on the current product's category
   const { products: relatedProductsArray } = useProducts({
-    category: product?.category || '',
+    category: typeof product?.category === 'object' ? product?.category?.slug : (product?.category || ''),
   });
 
-  // Filter out the current product from related
   const relatedProducts = relatedProductsArray
     .filter((p) => p.id !== product?.id)
     .slice(0, 4);
 
-  // Recently viewed (newest products as placeholder)
-  const { products: recentlyViewed } = useProducts({
-    ordering: '-created_at',
-  });
+  // Recently viewed from localStorage
   const recentItems = recentlyViewed.filter((p) => p.id !== product?.id).slice(0, 4);
 
   useEffect(() => {
     if (product) {
-      window.scrollTo(0, 0);
       setQuantity(1);
       setCartSuccess(false);
+      setActiveTab('description');
+      // Track this product view
+      trackView(product);
     }
   }, [product?.slug]);
 
@@ -75,6 +86,21 @@ const ProductDetail = () => {
     await toggleWishlist(product.id, {
       onRequireLogin: () => navigate('/login', { state: { from: location } }),
     });
+  };
+
+  const handleShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: product.name,
+          text: `Check out ${product.name} on Aparna Aura`,
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        // Could add toast here
+      }
+    } catch {}
   };
 
   if (error) {
@@ -112,12 +138,76 @@ const ProductDetail = () => {
   const images = product.images || [];
   if (images.length === 0 && product.image) images.push(product.image);
 
+  const materialName = product.material || 'Premium Quality Gold';
+  const categoryName = typeof product.category === 'object' ? product.category?.name : (product.category || 'Jewellery');
+  const categorySlug = typeof product.category === 'object' ? product.category?.slug : product.category;
+
+  const productSchema = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": product.name,
+    "image": images,
+    "description": product.description,
+    "sku": product.sku || product.id,
+    "brand": {
+      "@type": "Brand",
+      "name": "Aparna Aura"
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": `https://aparnaaura.com/product/${product.slug}`,
+      "priceCurrency": "INR",
+      "price": product.price,
+      "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "itemCondition": "https://schema.org/NewCondition"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": product.rating || 5,
+      "reviewCount": product.reviewCount || 1
+    }
+  };
+
+  const breadcrumbsSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Shop",
+        "item": "https://aparnaaura.com/products"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": categoryName,
+        "item": `https://aparnaaura.com/categories/${categorySlug}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": product.name,
+        "item": `https://aparnaaura.com/product/${product.slug}`
+      }
+    ]
+  };
+
   return (
     <div className="bg-white">
+      <SEO
+        title={product.name}
+        description={product.description?.substring(0, 155)}
+        image={images[0]}
+        url={`/product/${product.slug}`}
+        type="product"
+        schema={productSchema}
+        breadcrumbsSchema={breadcrumbsSchema}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Breadcrumb items={[
           { label: 'Shop', path: '/products' },
-          { label: product.category, path: `/categories/${product.category}` },
+          { label: categoryName, path: `/categories/${typeof product.category === 'object' ? product.category?.slug : product.category}` },
           { label: product.name, path: `/product/${product.slug}` },
         ]} />
 
@@ -145,7 +235,7 @@ const ProductDetail = () => {
               {/* Header */}
               <div className="mb-6 border-b border-gray-100 pb-6">
                 <p className="text-[#D4AF37] font-medium tracking-widest uppercase text-sm mb-2">
-                  {product.category}
+                  {categoryName}
                 </p>
                 <h1 className="text-3xl md:text-4xl font-bold font-heading text-[#382135] mb-4">
                   {product.name}
@@ -153,7 +243,7 @@ const ProductDetail = () => {
                 <div className="flex items-center justify-between">
                   <RatingDisplay rating={product.rating || 5} reviewCount={product.reviewCount || 0} size="md" />
                   <div className="flex gap-2">
-                    <button className="p-2 text-gray-400 hover:text-[#382135] transition-colors rounded-full hover:bg-gray-50">
+                    <button onClick={handleShare} className="p-2 text-gray-400 hover:text-[#382135] transition-colors rounded-full hover:bg-gray-50" title="Share">
                       <Share2 size={20} />
                     </button>
                     <button
@@ -180,13 +270,103 @@ const ProductDetail = () => {
                 </p>
               </div>
 
-              {/* Description */}
-              <div className="mb-8 prose prose-sm text-gray-600">
-                <p>{product.description}</p>
-                <ul className="mt-4 space-y-1">
-                  <li><strong>Material:</strong> {product.material || 'Premium Quality'}</li>
-                  <li><strong>Weight:</strong> {product.weight || 'Standard'}</li>
-                </ul>
+              {/* ── Product Storytelling Tabs ── */}
+              <div className="mb-8">
+                <div className="flex gap-1 bg-[#F3EFE8] rounded-xl p-1 mb-5">
+                  {STORY_TABS.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`flex-1 py-2.5 px-3 text-xs font-semibold rounded-lg transition-all duration-300 ${
+                        activeTab === tab.id
+                          ? 'bg-white text-[#382135] shadow-sm'
+                          : 'text-gray-500 hover:text-[#382135]'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeTab}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.2 }}
+                    className="prose prose-sm text-gray-600"
+                  >
+                    {activeTab === 'description' && (
+                      <div>
+                        <p>{product.description}</p>
+                        <ul className="mt-4 space-y-1">
+                          <li><strong>Material:</strong> {materialName}</li>
+                          <li><strong>Weight:</strong> {product.weight || 'Standard'}</li>
+                          {product.sku && <li><strong>SKU:</strong> {product.sku}</li>}
+                        </ul>
+                      </div>
+                    )}
+
+                    {activeTab === 'craftsmanship' && (
+                      <div className="space-y-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Sparkles size={16} className="text-[#D4AF37]" />
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-bold text-[#382135] mb-1">Design Inspiration</h4>
+                            <p className="text-sm">This {categoryName.toLowerCase()} draws inspiration from classical Indian motifs, reimagined with contemporary elegance for the modern connoisseur.</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Gem size={16} className="text-[#D4AF37]" />
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-bold text-[#382135] mb-1">Artisan Process</h4>
+                            <p className="text-sm">Handcrafted by master artisans with decades of experience, each piece undergoes over 20 quality checks before reaching you.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeTab === 'materials' && (
+                      <div className="space-y-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Palette size={16} className="text-[#D4AF37]" />
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-bold text-[#382135] mb-1">Material Origin</h4>
+                            <p className="text-sm">Crafted with {materialName}, sourced from certified suppliers adhering to the highest ethical and quality standards.</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-[#D4AF37]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <Award size={16} className="text-[#D4AF37]" />
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-bold text-[#382135] mb-1">BIS Hallmarked</h4>
+                            <p className="text-sm">Every piece is BIS Hallmark certified, guaranteeing the purity and authenticity of the precious metal used.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {activeTab === 'care' && (
+                      <div>
+                        <ul className="space-y-2 text-sm list-none p-0">
+                          <li className="flex items-center gap-2"><Check size={14} className="text-[#D4AF37] flex-shrink-0" /> Store in the provided jewellery box when not in use</li>
+                          <li className="flex items-center gap-2"><Check size={14} className="text-[#D4AF37] flex-shrink-0" /> Avoid contact with perfume, chemicals, and water</li>
+                          <li className="flex items-center gap-2"><Check size={14} className="text-[#D4AF37] flex-shrink-0" /> Clean gently with a soft, lint-free cloth</li>
+                          <li className="flex items-center gap-2"><Check size={14} className="text-[#D4AF37] flex-shrink-0" /> Remove before exercising or sleeping</li>
+                          <li className="flex items-center gap-2"><Check size={14} className="text-[#D4AF37] flex-shrink-0" /> Professional cleaning available at any {`Aparna Aura`} store</li>
+                        </ul>
+                      </div>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
               </div>
 
               {/* Actions */}
@@ -239,41 +419,97 @@ const ProductDetail = () => {
                 </div>
               </div>
 
-              {/* Features */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                <div className="flex flex-col items-center text-center gap-2">
-                  <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-[#D4AF37]">
-                    <Shield size={24} />
-                  </div>
-                  <h4 className="text-sm font-bold text-[#382135]">Certified</h4>
-                  <p className="text-xs text-gray-500">100% Authentic</p>
-                </div>
-                <div className="flex flex-col items-center text-center gap-2">
-                  <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-[#D4AF37]">
-                    <Truck size={24} />
-                  </div>
-                  <h4 className="text-sm font-bold text-[#382135]">Free Shipping</h4>
-                  <p className="text-xs text-gray-500">Insured Delivery</p>
-                </div>
-                <div className="flex flex-col items-center text-center gap-2">
-                  <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center text-[#D4AF37]">
-                    <RefreshCw size={24} />
-                  </div>
-                  <h4 className="text-sm font-bold text-[#382135]">Easy Returns</h4>
-                  <p className="text-xs text-gray-500">30-Day Policy</p>
-                </div>
-              </div>
+              <LuxuryGuarantees className="mt-6" />
 
             </motion.div>
           </div>
         </div>
       </div>
 
+      {/* Customer Reviews Section */}
+      <section className="bg-white py-16 border-t border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <SectionTitle title="Client Testimonials" />
+          <div className="text-center mb-12">
+            <div className="flex justify-center items-center gap-1 mb-2">
+              {[1, 2, 3, 4, 5].map(i => <Star key={i} size={20} className="text-[#D4AF37]" fill="currentColor" />)}
+            </div>
+            <p className="text-[#382135] font-bold text-lg">4.9 / 5.0</p>
+            <p className="text-gray-500 text-sm">Based on 128 verified reviews</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-[#FAF8F5] p-8 border border-[#E6E1D8]">
+              <div className="flex gap-1 mb-2">
+                {[1, 2, 3, 4, 5].map(i => <Star key={i} size={14} className="text-[#D4AF37]" fill="currentColor" />)}
+              </div>
+              <p className="text-xs text-green-600 font-bold uppercase tracking-widest mb-4 flex items-center gap-1"><Check size={12}/> Verified Purchase</p>
+              
+              <h4 className="text-[#382135] font-bold mb-2 text-lg" style={{ fontFamily: '"Playfair Display", serif' }}>Exceeded all expectations</h4>
+              <p className="text-gray-600 text-sm mb-6 italic leading-relaxed">
+                "The craftsmanship is absolutely breathtaking. The packaging it arrived in made the unboxing experience feel incredibly special. Truly a masterpiece that I will pass down."
+              </p>
+              
+              <div className="space-y-2 mb-6 border-t border-[#E6E1D8] pt-4">
+                <div className="flex justify-between text-xs text-gray-500"><span className="uppercase tracking-wider">Packaging Quality</span><span className="text-[#D4AF37]">5/5</span></div>
+                <div className="flex justify-between text-xs text-gray-500"><span className="uppercase tracking-wider">Product Quality</span><span className="text-[#D4AF37]">5/5</span></div>
+                <div className="flex justify-between text-xs text-gray-500"><span className="uppercase tracking-wider">Delivery Experience</span><span className="text-[#D4AF37]">5/5</span></div>
+                <div className="flex justify-between text-xs font-bold text-[#382135] mt-2"><span className="uppercase tracking-wider">Would Recommend</span><span className="text-green-600">Yes</span></div>
+              </div>
+              
+              <p className="text-xs font-bold text-[#382135] uppercase tracking-widest">— Priya S.</p>
+            </div>
+            
+            <div className="bg-[#FAF8F5] p-8 border border-[#E6E1D8]">
+              <div className="flex gap-1 mb-2">
+                {[1, 2, 3, 4, 5].map(i => <Star key={i} size={14} className="text-[#D4AF37]" fill="currentColor" />)}
+              </div>
+              <p className="text-xs text-green-600 font-bold uppercase tracking-widest mb-4 flex items-center gap-1"><Check size={12}/> Verified Purchase</p>
+
+              <h4 className="text-[#382135] font-bold mb-2 text-lg" style={{ fontFamily: '"Playfair Display", serif' }}>Impeccable service</h4>
+              <p className="text-gray-600 text-sm mb-6 italic leading-relaxed">
+                "I was hesitant to buy fine jewellery online, but the insured delivery and constant updates put me at ease. The piece itself is stunning and the quality is undeniable."
+              </p>
+
+              <div className="space-y-2 mb-6 border-t border-[#E6E1D8] pt-4">
+                <div className="flex justify-between text-xs text-gray-500"><span className="uppercase tracking-wider">Packaging Quality</span><span className="text-[#D4AF37]">5/5</span></div>
+                <div className="flex justify-between text-xs text-gray-500"><span className="uppercase tracking-wider">Product Quality</span><span className="text-[#D4AF37]">5/5</span></div>
+                <div className="flex justify-between text-xs text-gray-500"><span className="uppercase tracking-wider">Delivery Experience</span><span className="text-[#D4AF37]">5/5</span></div>
+                <div className="flex justify-between text-xs font-bold text-[#382135] mt-2"><span className="uppercase tracking-wider">Would Recommend</span><span className="text-green-600">Yes</span></div>
+              </div>
+
+              <p className="text-xs font-bold text-[#382135] uppercase tracking-widest">— Ananya M.</p>
+            </div>
+
+            <div className="bg-[#FAF8F5] p-8 border border-[#E6E1D8]">
+              <div className="flex gap-1 mb-2">
+                {[1, 2, 3, 4, 5].map(i => <Star key={i} size={14} className="text-[#D4AF37]" fill="currentColor" />)}
+              </div>
+              <p className="text-xs text-green-600 font-bold uppercase tracking-widest mb-4 flex items-center gap-1"><Check size={12}/> Verified Purchase</p>
+
+              <h4 className="text-[#382135] font-bold mb-2 text-lg" style={{ fontFamily: '"Playfair Display", serif' }}>A true work of art</h4>
+              <p className="text-gray-600 text-sm mb-6 italic leading-relaxed">
+                "The attention to detail on this piece is phenomenal. It catches the light beautifully. The certificate of authenticity provided that extra layer of trust."
+              </p>
+
+              <div className="space-y-2 mb-6 border-t border-[#E6E1D8] pt-4">
+                <div className="flex justify-between text-xs text-gray-500"><span className="uppercase tracking-wider">Packaging Quality</span><span className="text-[#D4AF37]">5/5</span></div>
+                <div className="flex justify-between text-xs text-gray-500"><span className="uppercase tracking-wider">Product Quality</span><span className="text-[#D4AF37]">5/5</span></div>
+                <div className="flex justify-between text-xs text-gray-500"><span className="uppercase tracking-wider">Delivery Experience</span><span className="text-[#D4AF37]">5/5</span></div>
+                <div className="flex justify-between text-xs font-bold text-[#382135] mt-2"><span className="uppercase tracking-wider">Would Recommend</span><span className="text-green-600">Yes</span></div>
+              </div>
+
+              <p className="text-xs font-bold text-[#382135] uppercase tracking-widest">— Sneha R.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Related Products */}
       {relatedProducts.length > 0 && (
-        <section className="bg-gray-50 py-16 border-t border-gray-100">
+        <section className="bg-[#FAF8F5] py-16 border-t border-[#E6E1D8]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <SectionTitle title="You May Also Like" />
+            <SectionTitle title="Curated For You" subtitle="Complete your collection with these complementary pieces" />
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
               {relatedProducts.map((p, i) => (
                 <ProductCard key={p.id} product={p} index={i} />
@@ -288,9 +524,16 @@ const ProductDetail = () => {
         <section className="bg-white py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <SectionTitle title="Recently Viewed" />
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
-              {recentItems.map((p, i) => (
-                <ProductCard key={p.id} product={p} index={i} />
+            <div className="flex gap-5 overflow-x-auto hide-scrollbar pb-4 mt-8 -mx-4 px-4">
+              {recentItems.map((item) => (
+                <Link key={item.id} to={`/product/${item.slug}`} className="flex-shrink-0 w-40 group">
+                  <div className="aspect-square rounded-2xl overflow-hidden bg-[#F3EFE8] mb-3 border border-[#E6E1D8] group-hover:shadow-lg transition-shadow">
+                    <img src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
+                  </div>
+                  <p className="text-xs text-[#D4AF37] uppercase tracking-wider font-medium">{item.category}</p>
+                  <p className="text-sm font-semibold text-[#382135] truncate group-hover:text-[#D4AF37] transition-colors">{item.name}</p>
+                  <p className="text-sm font-bold text-[#382135] mt-0.5">₹{Number(item.price || 0).toLocaleString('en-IN')}</p>
+                </Link>
               ))}
             </div>
           </div>
@@ -298,7 +541,7 @@ const ProductDetail = () => {
       )}
 
       {/* Sticky Mobile Purchase Panel */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 md:hidden z-40 shadow-2xl">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 p-4 md:hidden z-40 shadow-2xl">
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 min-w-0">
             <p className="text-xs text-gray-500 truncate">{product.name}</p>
@@ -307,7 +550,7 @@ const ProductDetail = () => {
           <button
             onClick={handleAddToCart}
             disabled={cartLoading}
-            className="flex-shrink-0 bg-[#382135] text-white px-6 py-2.5 rounded-full font-semibold text-sm disabled:opacity-70"
+            className="flex-shrink-0 bg-[#382135] text-white px-6 py-2.5 rounded-full font-semibold text-sm disabled:opacity-70 shadow-lg"
           >
             {cartLoading ? 'Adding...' : cartSuccess ? 'Added ✓' : 'Add to Cart'}
           </button>

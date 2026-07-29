@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, SlidersHorizontal, Grid3X3, List, X, Package } from 'lucide-react';
+import { Search, SlidersHorizontal, X, Package, ChevronDown } from 'lucide-react';
 import ProductCard from '../components/ProductCard/ProductCard';
 import FilterSidebar from '../components/FilterSidebar/FilterSidebar';
 import Pagination from '../components/Pagination/Pagination';
@@ -11,6 +11,7 @@ import EmptyState from '../components/EmptyState/EmptyState';
 import ErrorState from '../components/ErrorState/ErrorState';
 import { useProducts } from '../hooks/useProducts';
 import { useCategories } from '../hooks/useCategories';
+import { APP_NAME } from '../constants/app';
 
 const ITEMS_PER_PAGE = 8; 
 
@@ -28,7 +29,6 @@ const Products = () => {
     page: parseInt(searchParams.get('page') || '1', 10),
   });
 
-  const [viewMode, setViewMode] = useState('grid');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [searchInput, setSearchInput] = useState(filters.search);
 
@@ -99,187 +99,179 @@ const Products = () => {
   const totalPages = Math.ceil((pagination.count || 0) / ITEMS_PER_PAGE);
 
   return (
-    <div className="container-default section-padding pb-16">
-      <Breadcrumb items={[{ label: 'Shop', path: '/products' }]} />
-
-      {/* Page Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8 mt-2"
-      >
-        <h1 className="text-3xl md:text-5xl font-bold text-[var(--color-brand)] mb-3">
-          Shop All Jewellery
-        </h1>
-        {!loading && !error && (
-          <p className="text-[var(--color-muted)] font-medium">
-            Showing {products.length} of {pagination.count} pieces
-          </p>
-        )}
-      </motion.div>
-
-      {/* Search & Controls Bar */}
-      <div className="flex flex-col md:flex-row items-center gap-4 mb-8 bg-white p-4 rounded-[16px] shadow-sm border border-[var(--color-border)]">
-        {/* Search */}
-        <form onSubmit={handleSearch} className="relative flex-1 w-full">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8A8A8A]" />
-          <input
-            type="text"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search jewellery..."
-            className="w-full pl-12 pr-10 py-3 border border-[var(--color-border)] rounded-[12px] bg-[var(--color-background)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] focus:border-transparent transition-all placeholder:text-[#8A8A8A]"
-          />
-          {searchInput && (
-            <button
-              type="button"
-              onClick={clearSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-[#8A8A8A] hover:text-[var(--color-text-main)] transition-colors"
-            >
-              <X size={16} />
-            </button>
-          )}
-        </form>
-
-        <div className="flex items-center gap-4 w-full md:w-auto">
-          {/* Sort Dropdown - Desktop */}
-          <select
-            value={filters.ordering}
-            onChange={(e) => setFilters(prev => ({ ...prev, ordering: e.target.value, page: 1 }))}
-            className="hidden lg:block border border-[var(--color-border)] rounded-[12px] px-4 py-3 text-sm bg-[var(--color-background)] focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] min-w-[200px] cursor-pointer font-medium text-[var(--color-text-main)]"
-          >
-            <option value="featured">Featured</option>
-            <option value="price">Price: Low to High</option>
-            <option value="-price">Price: High to Low</option>
-            <option value="-created_at">Newest First</option>
-            <option value="-rating">Highest Rated</option>
-          </select>
-
-          {/* View Mode Toggle */}
-          <div className="hidden lg:flex items-center border border-[var(--color-border)] rounded-[12px] overflow-hidden bg-[var(--color-background)] p-1">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-[8px] transition-colors ${viewMode === 'grid' ? 'bg-white shadow-sm text-[var(--color-brand)]' : 'text-[#8A8A8A] hover:text-[var(--color-brand)]'}`}
-            >
-              <Grid3X3 size={18} />
-            </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-2 rounded-[8px] transition-colors ${viewMode === 'list' ? 'bg-white shadow-sm text-[var(--color-brand)]' : 'text-[#8A8A8A] hover:text-[var(--color-brand)]'}`}
-            >
-              <List size={18} />
-            </button>
-          </div>
-
-          {/* Mobile Filter Button */}
-          <button
-            onClick={() => setIsFilterOpen(true)}
-            className="lg:hidden flex-1 flex items-center justify-center gap-2 border border-[var(--color-border)] rounded-[12px] px-4 py-3 text-sm font-semibold text-[var(--color-brand)] bg-[var(--color-background)] transition-colors"
-          >
-            <SlidersHorizontal size={16} />
-            Filters
-            {activeFilterCount > 0 && (
-              <span className="bg-[var(--color-accent)] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                {activeFilterCount}
-              </span>
-            )}
-          </button>
+    <div className="bg-white min-h-screen pb-20">
+      {/* Editorial Header */}
+      <div className="relative bg-[#382135] pt-24 pb-20 px-4 overflow-hidden">
+        {/* Subtle texture overlay */}
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#D4AF37 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
+        <div className="relative z-10 max-w-7xl mx-auto text-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4" style={{ fontFamily: '"Playfair Display", serif' }}>
+              {filters.category ? categories?.find(c => c.slug === filters.category)?.name || 'The Collection' : 'The Signature Collection'}
+            </h1>
+            <p className="text-white/70 max-w-2xl mx-auto text-sm md:text-base leading-relaxed mb-8">
+              Discover our exquisite range of handcrafted jewellery. Each piece tells a story of timeless elegance and unparalleled craftsmanship.
+            </p>
+            
+            {/* Minimalist Search within Header */}
+            <form onSubmit={handleSearch} className="max-w-md mx-auto relative group">
+              <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/50 group-focus-within:text-[#D4AF37] transition-colors" />
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Search the collection..."
+                className="w-full pl-12 pr-10 py-3.5 bg-white/10 border border-white/20 rounded-full text-white placeholder:text-white/50 focus:outline-none focus:bg-white/15 focus:border-[#D4AF37]/50 backdrop-blur-md transition-all text-sm"
+              />
+              {searchInput && (
+                <button type="button" onClick={clearSearch} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors">
+                  <X size={16} />
+                </button>
+              )}
+            </form>
+          </motion.div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex flex-col lg:flex-row gap-8 lg:gap-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+        <Breadcrumb items={[{ label: 'Shop', path: '/products' }]} />
         
-        {/* Sidebar */}
-        <div className="hidden lg:block w-72 flex-shrink-0">
-          <div className="sticky top-28">
+        {/* Toolbar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between py-6 mb-8 border-b border-gray-100 gap-4">
+          <p className="text-sm font-medium text-gray-500">
+            {!loading && !error ? `Showing ${products.length} of ${pagination.count} results` : 'Loading...'}
+          </p>
+
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            {/* Sort Dropdown - Desktop */}
+            <div className="relative hidden lg:block group">
+              <select
+                value={filters.ordering}
+                onChange={(e) => setFilters(prev => ({ ...prev, ordering: e.target.value, page: 1 }))}
+                className="appearance-none bg-transparent pr-8 pl-2 py-2 text-sm font-bold text-[#382135] focus:outline-none cursor-pointer border-none uppercase tracking-wider"
+              >
+                <option value="featured">Featured</option>
+                <option value="price">Price: Low to High</option>
+                <option value="-price">Price: High to Low</option>
+                <option value="-created_at">Newest First</option>
+                <option value="-rating">Highest Rated</option>
+              </select>
+              <ChevronDown size={14} className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none text-[#382135] group-hover:text-[#D4AF37] transition-colors" />
+            </div>
+
+            {/* Mobile Filter Button */}
+            <button
+              onClick={() => setIsFilterOpen(true)}
+              className="lg:hidden flex-1 flex items-center justify-center gap-2 border border-gray-200 rounded-full px-6 py-2.5 text-sm font-bold text-[#382135] hover:border-[#D4AF37] transition-colors"
+            >
+              <SlidersHorizontal size={16} />
+              Refine
+              {activeFilterCount > 0 && (
+                <span className="bg-[#D4AF37] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center ml-1">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex flex-col lg:flex-row gap-12">
+          
+          {/* Sidebar */}
+          <div className="hidden lg:block w-64 flex-shrink-0">
+            <div className="sticky top-28">
+              <FilterSidebar
+                isOpen={true} // Always open on desktop
+                onClose={() => {}}
+                filters={sidebarFilters}
+                onFilterChange={handleFilterChange}
+                categories={categories} 
+              />
+            </div>
+          </div>
+
+          {/* Mobile Filter Sidebar Drawer */}
+          <div className="lg:hidden">
             <FilterSidebar
-              isOpen={true} // Always open on desktop
-              onClose={() => {}}
+              isOpen={isFilterOpen}
+              onClose={() => setIsFilterOpen(false)}
               filters={sidebarFilters}
               onFilterChange={handleFilterChange}
               categories={categories} 
             />
           </div>
-        </div>
 
-        {/* Mobile Filter Sidebar Drawer */}
-        <div className="lg:hidden">
-          <FilterSidebar
-            isOpen={isFilterOpen}
-            onClose={() => setIsFilterOpen(false)}
-            filters={sidebarFilters}
-            onFilterChange={handleFilterChange}
-            categories={categories} 
-          />
-        </div>
-
-        {/* Product Grid Container */}
-        <div className="flex-1 min-w-0">
-          
-          {/* Category Chips (Mobile/Tablet only to save space) */}
-          <div className="lg:hidden flex gap-2 overflow-x-auto hide-scrollbar pb-4 mb-6">
-            <button
-              onClick={() => setFilters(prev => ({ ...prev, category: '', page: 1 }))}
-              className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                !filters.category
-                  ? 'bg-[var(--color-brand)] text-white'
-                  : 'bg-white border border-[var(--color-border)] text-[var(--color-text-main)] hover:border-[var(--color-accent)]'
-              }`}
-            >
-              All
-            </button>
-            {categories?.map((cat) => (
+          {/* Product Grid Container */}
+          <div className="flex-1 min-w-0">
+            
+            {/* Category Chips (Mobile/Tablet only) */}
+            <div className="lg:hidden flex gap-2 overflow-x-auto hide-scrollbar pb-4 mb-6 -mx-4 px-4">
               <button
-                key={cat.slug}
-                onClick={() => setFilters(prev => ({ ...prev, category: cat.slug, page: 1 }))}
-                className={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                  filters.category === cat.slug
-                    ? 'bg-[var(--color-brand)] text-white'
-                    : 'bg-white border border-[var(--color-border)] text-[var(--color-text-main)] hover:border-[var(--color-accent)]'
+                onClick={() => setFilters(prev => ({ ...prev, category: '', page: 1 }))}
+                className={`flex-shrink-0 px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
+                  !filters.category
+                    ? 'bg-[#382135] text-white shadow-md shadow-[#382135]/20'
+                    : 'bg-white border border-gray-200 text-gray-600 hover:border-[#D4AF37]'
                 }`}
               >
-                {cat.name}
+                All Pieces
               </button>
-            ))}
-          </div>
-
-          {error ? (
-            <ErrorState message={error} onRetry={retry} />
-          ) : loading ? (
-            <div className={`grid ${viewMode === 'grid' ? 'grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'} gap-6`}>
-              <SkeletonLoader type={viewMode === 'grid' ? 'card' : 'line'} count={6} />
-            </div>
-          ) : products.length === 0 ? (
-            <EmptyState
-              icon={Package}
-              title="No Products Found"
-              description="Try adjusting your filters or search query to find what you're looking for."
-              action={
+              {categories?.map((cat) => (
                 <button
-                  onClick={clearAllFilters}
-                  className="btn-primary mt-4"
+                  key={cat.slug}
+                  onClick={() => setFilters(prev => ({ ...prev, category: cat.slug, page: 1 }))}
+                  className={`flex-shrink-0 px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
+                    filters.category === cat.slug
+                      ? 'bg-[#382135] text-white shadow-md shadow-[#382135]/20'
+                      : 'bg-white border border-gray-200 text-gray-600 hover:border-[#D4AF37]'
+                  }`}
                 >
-                  Clear Filters
+                  {cat.name}
                 </button>
-              }
-            />
-          ) : (
-            <>
-              <div className={`grid ${
-                viewMode === 'grid' ? 'grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'
-              } gap-4 md:gap-6 lg:gap-8`}>
-                {products.map((product, i) => (
-                  <ProductCard key={product.id || product.slug} product={product} index={i} />
-                ))}
+              ))}
+            </div>
+
+            {error ? (
+              <ErrorState message={error} onRetry={retry} />
+            ) : loading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6 lg:gap-8">
+                <SkeletonLoader type="card" count={6} />
               </div>
-              <Pagination
-                currentPage={filters.page}
-                totalPages={totalPages > 0 ? totalPages : 1}
-                onPageChange={handlePageChange}
+            ) : products.length === 0 ? (
+              <EmptyState
+                icon={Package}
+                title="No Products Found"
+                description="Try adjusting your filters or search query to explore our collection."
+                action={
+                  <button onClick={clearAllFilters} className="mt-6 px-8 py-3 bg-[#382135] text-white rounded-full font-semibold hover:bg-[#2a1827] transition-colors">
+                    Clear Filters
+                  </button>
+                }
               />
-            </>
-          )}
+            ) : (
+              <>
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                  className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-12 lg:gap-x-10 lg:gap-y-16"
+                >
+                  {products.map((product, i) => (
+                    <ProductCard key={product.id || product.slug} product={product} index={i} />
+                  ))}
+                </motion.div>
+                
+                <div className="mt-16 pt-8 border-t border-gray-100">
+                  <Pagination
+                    currentPage={filters.page}
+                    totalPages={totalPages > 0 ? totalPages : 1}
+                    onPageChange={handlePageChange}
+                  />
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

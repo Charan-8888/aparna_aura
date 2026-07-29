@@ -10,6 +10,7 @@ import ErrorState from '../components/ErrorState/ErrorState';
 import { Package } from 'lucide-react';
 import { useCategories } from '../hooks/useCategories';
 import { useProducts } from '../hooks/useProducts';
+import SEO from '../components/SEO/SEO';
 
 const Category = () => {
   const { slug } = useParams();
@@ -59,8 +60,27 @@ const Category = () => {
 
   // If slug is 'all', show list of categories
   if (isAll) {
+    const allBreadcrumbsSchema = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Categories",
+          "item": "https://aparnaaura.com/categories/all"
+        }
+      ]
+    };
+
     return (
       <div>
+        <SEO
+          title="All Collections"
+          description="Explore our complete collection of fine jewellery. Discover beautiful rings, necklaces, earrings, and more."
+          url="/categories/all"
+          breadcrumbsSchema={allBreadcrumbsSchema}
+        />
         <div className="relative h-[40vh] md:h-[50vh] w-full flex items-center justify-center text-center overflow-hidden">
           <div className="absolute inset-0">
             <img src="https://images.unsplash.com/photo-1515562141589-67f0d6ce4819?w=1600&h=600&fit=crop" alt="Categories" className="w-full h-full object-cover" />
@@ -115,8 +135,34 @@ const Category = () => {
   // Single Category View
   const safeImage = category.image || 'https://images.unsplash.com/photo-1515562141589-67f0d6ce4819?w=1600&h=600&fit=crop';
   
+  const categoryBreadcrumbsSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Categories",
+        "item": "https://aparnaaura.com/categories/all"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": category.name,
+        "item": `https://aparnaaura.com/categories/${category.slug}`
+      }
+    ]
+  };
+
   return (
     <div>
+      <SEO
+        title={`${category.name} Collection`}
+        description={category.description || `Explore our beautiful ${category.name} collection. Handcrafted luxury jewellery.`}
+        image={safeImage}
+        url={`/categories/${category.slug}`}
+        breadcrumbsSchema={categoryBreadcrumbsSchema}
+      />
       {/* Luxury Banner */}
       <div className="relative h-[40vh] md:h-[50vh] w-full flex items-center justify-center text-center overflow-hidden">
         <div className="absolute inset-0">

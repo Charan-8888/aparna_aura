@@ -1,6 +1,7 @@
 import React, { useState, useRef, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, ZoomIn, ChevronLeft, ChevronRight } from 'lucide-react';
+import OptimizedImage from '../OptimizedImage/OptimizedImage';
 
 const ImageGallery = memo(({ images = [], video = null, productName = '' }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -65,10 +66,13 @@ const ImageGallery = memo(({ images = [], video = null, productName = '' }) => {
               onMouseLeave={() => setIsZoomed(false)}
               onMouseMove={handleMouseMove}
             >
-              <img
+              <OptimizedImage
                 src={selectedImage}
                 alt={`${productName} - Image ${selectedIndex + 1}`}
                 className="w-full h-full object-cover"
+                containerClassName="absolute inset-0 w-full h-full"
+                fetchPriority="high"
+                loading="eager"
                 style={isZoomed ? {
                   transform: 'scale(2)',
                   transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%`,
@@ -120,7 +124,13 @@ const ImageGallery = memo(({ images = [], video = null, productName = '' }) => {
                 : 'border-transparent opacity-60 hover:opacity-100'
             }`}
           >
-            <img src={img} alt={`Thumbnail ${i + 1}`} className="w-full h-full object-cover" />
+            <OptimizedImage 
+              src={img} 
+              alt={`Thumbnail ${i + 1}`} 
+              className="w-full h-full object-cover" 
+              containerClassName="absolute inset-0 w-full h-full"
+              loading="lazy"
+            />
           </button>
         ))}
         {video && (
@@ -132,7 +142,13 @@ const ImageGallery = memo(({ images = [], video = null, productName = '' }) => {
                 : 'border-transparent opacity-60 hover:opacity-100'
             }`}
           >
-            <img src={images[0]} alt="Video thumbnail" className="w-full h-full object-cover" />
+            <OptimizedImage 
+              src={images[0]} 
+              alt="Video thumbnail" 
+              className="w-full h-full object-cover" 
+              containerClassName="absolute inset-0 w-full h-full"
+              loading="lazy"
+            />
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
               <Play size={20} className="text-white fill-white" />
             </div>

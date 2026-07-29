@@ -20,7 +20,12 @@ const OrderSuccess = lazy(() => import('../pages/OrderSuccess'));
 const Payment = lazy(() => import('../pages/Payment'));
 const Addresses = lazy(() => import('../pages/Addresses'));
 const NotFound = lazy(() => import('../pages/NotFound'));
-
+const VirtualTryOn = lazy(() => import('../pages/VirtualTryOn'));
+const About = lazy(() => import('../pages/About'));
+const FAQ = lazy(() => import('../pages/FAQ'));
+const ShippingReturns = lazy(() => import('../pages/ShippingReturns'));
+const Contact = lazy(() => import('../pages/Contact'));
+const Care = lazy(() => import('../pages/Care'));
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -115,6 +120,30 @@ export const router = createBrowserRouter([
       {
         path: 'register',
         element: <Register />,
+      },
+      {
+        path: 'try-on',
+        element: <VirtualTryOn />,
+      },
+      {
+        path: 'about',
+        element: <About />,
+      },
+      {
+        path: 'faq',
+        element: <FAQ />,
+      },
+      {
+        path: 'shipping-returns',
+        element: <ShippingReturns />,
+      },
+      {
+        path: 'contact',
+        element: <Contact />,
+      },
+      {
+        path: 'care',
+        element: <Care />,
       },
       {
         path: '*',

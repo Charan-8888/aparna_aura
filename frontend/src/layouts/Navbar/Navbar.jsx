@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ShoppingBag, Heart, User, Menu, X, LogOut, Package, ChevronDown, MapPin } from 'lucide-react';
+import { Search, ShoppingBag, Heart, User, Menu, X, LogOut, Package, ChevronDown, MapPin, Sparkles } from 'lucide-react';
 import { MAIN_NAV_LINKS } from '../../constants/navigation';
 import { APP_NAME } from '../../constants/app';
 import SearchOverlay from '../../components/SearchOverlay/SearchOverlay';
@@ -14,6 +14,7 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const [showAnnouncement, setShowAnnouncement] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
   const { currentUser, isAuthenticated, logout } = useAuth();
@@ -33,7 +34,7 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -65,18 +66,53 @@ const Navbar = () => {
 
   return (
     <>
+      {/* ── Announcement Bar ── */}
+      <AnimatePresence>
+        {showAnnouncement && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed top-0 left-0 right-0 z-50 bg-[#382135] overflow-hidden"
+          >
+            <div className="relative flex items-center justify-center px-4 py-2">
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-white/90 font-medium tracking-wide">
+                <Sparkles size={14} className="text-[#D4AF37] flex-shrink-0" />
+                <span className="hidden sm:inline">Free Insured Shipping on Orders Over ₹5,000</span>
+                <span className="sm:hidden">Free Shipping Over ₹5,000</span>
+                <span className="text-white/30 mx-2">|</span>
+                <span className="text-[#D4AF37]">Certified Authentic Jewellery</span>
+              </div>
+              <button
+                onClick={() => setShowAnnouncement(false)}
+                className="absolute right-3 p-1 text-white/40 hover:text-white transition-colors"
+                aria-label="Close announcement"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <header
-        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
+        className={`fixed left-0 right-0 z-40 transition-all duration-500 ${
+          showAnnouncement ? 'top-[36px]' : 'top-0'
+        } ${
           isScrolled
-            ? 'bg-white/95 backdrop-blur-md shadow-sm py-3'
-            : 'bg-white/80 backdrop-blur-sm py-4'
+            ? 'bg-white/98 backdrop-blur-xl shadow-[0_1px_20px_rgba(0,0,0,0.06)] py-3'
+            : 'bg-white/90 backdrop-blur-md py-4'
         }`}
       >
+        {/* Gold accent line */}
+        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent" />
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
             {/* Logo */}
-            <Link to="/" className="flex-shrink-0 z-50">
-              <span className="text-2xl font-bold tracking-wider text-[#382135]" style={{ fontFamily: '"Playfair Display", serif' }}>
+            <Link to="/" className="flex-shrink-0 z-50 group">
+              <span className="text-2xl font-bold tracking-wider text-[#382135] transition-colors duration-300 group-hover:text-[#D4AF37]" style={{ fontFamily: '"Playfair Display", serif' }}>
                 {APP_NAME}
               </span>
             </Link>
@@ -104,27 +140,36 @@ const Navbar = () => {
             </nav>
 
             {/* Desktop Icons */}
-            <div className="hidden md:flex items-center space-x-2">
+            <div className="hidden md:flex items-center space-x-1">
               <button
                 onClick={() => setIsSearchOpen(true)}
-                className="p-2 text-gray-500 hover:text-[#382135] transition-colors rounded-full hover:bg-gray-50"
+                className="p-2.5 text-gray-500 hover:text-[#382135] transition-colors rounded-full hover:bg-gray-50"
+                aria-label="Search"
               >
                 <Search size={20} />
               </button>
-              <Link to="/wishlist" className="p-2 text-gray-500 hover:text-[#382135] transition-colors rounded-full hover:bg-gray-50 relative">
+              <Link to="/wishlist" className="p-2.5 text-gray-500 hover:text-[#382135] transition-colors rounded-full hover:bg-gray-50 relative" aria-label="Wishlist">
                 <Heart size={20} />
                 {isAuthenticated && wishlistCount > 0 && (
-                  <span className="absolute top-0.5 right-0.5 bg-red-500 text-[10px] text-white font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute top-0.5 right-0.5 bg-red-500 text-[10px] text-white font-bold rounded-full w-4 h-4 flex items-center justify-center"
+                  >
                     {wishlistCount > 9 ? '9+' : wishlistCount}
-                  </span>
+                  </motion.span>
                 )}
               </Link>
-              <Link to="/cart" className="p-2 text-gray-500 hover:text-[#382135] transition-colors rounded-full hover:bg-gray-50 relative">
+              <Link to="/cart" className="p-2.5 text-gray-500 hover:text-[#382135] transition-colors rounded-full hover:bg-gray-50 relative" aria-label="Cart">
                 <ShoppingBag size={20} />
                 {itemCount > 0 && (
-                  <span className="absolute top-0.5 right-0.5 bg-[#D4AF37] text-[10px] text-[#382135] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute top-0.5 right-0.5 bg-[#D4AF37] text-[10px] text-[#382135] font-bold rounded-full w-4 h-4 flex items-center justify-center"
+                  >
                     {itemCount > 9 ? '9+' : itemCount}
-                  </span>
+                  </motion.span>
                 )}
               </Link>
 
@@ -136,7 +181,7 @@ const Navbar = () => {
                     onClick={() => setIsUserDropdownOpen((s) => !s)}
                     className="flex items-center gap-1.5 ml-1 pl-2 pr-1 py-1 rounded-full hover:bg-gray-50 transition-colors"
                   >
-                    <div className="w-8 h-8 rounded-full bg-[#382135] text-white text-xs font-bold flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#382135] to-[#4D2C48] text-white text-xs font-bold flex items-center justify-center ring-2 ring-[#D4AF37]/20">
                       {initials}
                     </div>
                     <ChevronDown
@@ -152,7 +197,7 @@ const Navbar = () => {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 8, scale: 0.97 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 overflow-hidden"
+                        className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 overflow-hidden"
                       >
                         {/* User info */}
                         <div className="px-4 py-3 border-b border-gray-50">
@@ -198,7 +243,7 @@ const Navbar = () => {
                 </div>
               ) : (
                 /* ── Guest: Login + Register buttons ── */
-                <div className="flex items-center gap-2 ml-1">
+                <div className="flex items-center gap-2 ml-2">
                   <Link
                     to="/login"
                     className="text-sm font-medium text-gray-600 hover:text-[#382135] px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
@@ -207,7 +252,7 @@ const Navbar = () => {
                   </Link>
                   <Link
                     to="/register"
-                    className="text-sm font-semibold bg-[#382135] text-white px-4 py-2 rounded-full hover:bg-[#2a1827] transition-colors"
+                    className="text-sm font-semibold bg-[#382135] text-white px-5 py-2 rounded-full hover:bg-[#2a1827] transition-all duration-300 hover:shadow-md"
                   >
                     Register
                   </Link>
@@ -216,11 +261,11 @@ const Navbar = () => {
             </div>
 
             {/* Mobile Icons */}
-            <div className="flex md:hidden items-center gap-2">
-              <button onClick={() => setIsSearchOpen(true)} className="p-2 text-gray-600">
+            <div className="flex md:hidden items-center gap-1">
+              <button onClick={() => setIsSearchOpen(true)} className="p-2 text-gray-600" aria-label="Search">
                 <Search size={20} />
               </button>
-              <Link to="/cart" className="p-2 text-gray-600 relative">
+              <Link to="/cart" className="p-2 text-gray-600 relative" aria-label="Cart">
                 <ShoppingBag size={20} />
                 {itemCount > 0 && (
                   <span className="absolute top-0.5 right-0.5 bg-[#D4AF37] text-[10px] text-[#382135] font-bold rounded-full w-4 h-4 flex items-center justify-center">
@@ -231,6 +276,7 @@ const Navbar = () => {
               <button
                 className="p-2 z-50 text-gray-600"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-label="Toggle menu"
               >
                 <AnimatePresence mode="wait" initial={false}>
                   {isMobileMenuOpen ? (
@@ -271,7 +317,7 @@ const Navbar = () => {
               <div className="p-6 pt-20 border-b border-gray-100">
                 {isAuthenticated ? (
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#382135] text-white text-sm font-bold flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#382135] to-[#4D2C48] text-white text-sm font-bold flex items-center justify-center ring-2 ring-[#D4AF37]/20">
                       {initials}
                     </div>
                     <div>

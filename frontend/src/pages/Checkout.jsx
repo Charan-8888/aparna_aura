@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, MapPin, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, MapPin, CheckCircle2, ShieldCheck, Lock } from 'lucide-react';
 import Breadcrumb from '../components/Breadcrumb/Breadcrumb';
 import Loader from '../components/Loader/Loader';
 import EmptyState from '../components/EmptyState/EmptyState';
+import LuxuryGuarantees from '../components/LuxuryGuarantees/LuxuryGuarantees';
 import { useCart } from '../hooks/useCart';
 import addressService from '../services/addressService';
 import orderService from '../services/orderService';
@@ -75,13 +76,13 @@ const Checkout = () => {
 
   if (itemCount === 0) {
     return (
-      <div className="container-default section-padding">
+      <div className="min-h-[70vh] flex items-center justify-center">
         <EmptyState
           title="Checkout Unavailable"
-          description="You cannot checkout with an empty cart."
+          description="Your bag is empty. Please add items before proceeding to checkout."
           action={
-            <Link to="/products" className="btn-primary mt-4">
-              Go to Shop
+            <Link to="/products" className="bg-[#382135] text-white px-8 py-3.5 rounded-full mt-4 inline-block font-semibold">
+              Explore Collections
             </Link>
           }
         />
@@ -90,154 +91,171 @@ const Checkout = () => {
   }
 
   return (
-    <div className="container-default section-padding pb-20">
-      <Breadcrumb items={[{ label: 'Cart', path: '/cart' }, { label: 'Checkout', path: '/checkout' }]} />
+    <div className="bg-white min-h-screen pb-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <Breadcrumb items={[{ label: 'Bag', path: '/cart' }, { label: 'Secure Checkout', path: '/checkout' }]} />
 
-      <h1 className="text-3xl md:text-4xl font-bold text-[var(--color-brand)] mt-2 mb-8">Secure Checkout</h1>
-
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-[12px] text-sm font-medium">
-          {error}
+        <div className="flex items-center gap-2 mt-6 mb-10">
+          <Lock size={20} className="text-[#D4AF37]" />
+          <h1 className="text-3xl font-bold text-[#382135]" style={{ fontFamily: '"Playfair Display", serif' }}>
+            Secure Checkout
+          </h1>
         </div>
-      )}
 
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Left Side - Details */}
-        <div className="flex-1 space-y-8">
-          
-          {/* Shipping Address Section */}
-          <section className="premium-card p-6 md:p-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-[var(--color-brand)] flex items-center gap-3">
-                <span className="w-7 h-7 rounded-full bg-[var(--color-brand)] text-white flex items-center justify-center text-xs">1</span>
-                Shipping Address
-              </h2>
-              <Link to="/addresses" className="text-sm font-semibold text-[var(--color-accent)] hover:text-[var(--color-brand)] transition-colors">
-                Manage Addresses
-              </Link>
-            </div>
+        {error && (
+          <div className="mb-8 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium">
+            {error}
+          </div>
+        )}
 
-            {addresses.length === 0 ? (
-              <div className="text-center py-10 bg-[var(--color-secondary-bg)] rounded-[12px] border border-dashed border-[var(--color-border)]">
-                <MapPin className="mx-auto text-[var(--color-muted)] mb-3" size={36} />
-                <p className="text-[var(--color-muted)] text-sm mb-5">You haven't added any addresses yet.</p>
-                <Link to="/addresses" className="btn-primary">
-                  Add New Address
+        <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
+          {/* Left Side - Details */}
+          <div className="flex-1 space-y-12">
+            
+            {/* Shipping Address Section */}
+            <section>
+              <div className="flex items-center justify-between mb-6 pb-2 border-b border-gray-100">
+                <h2 className="text-xl font-bold text-[#382135] uppercase tracking-wider text-sm">
+                  1. Delivery Details
+                </h2>
+                <Link to="/addresses" className="text-xs font-bold text-[#D4AF37] hover:text-[#382135] uppercase tracking-wider transition-colors">
+                  Manage Addresses
                 </Link>
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {addresses.map((address) => {
-                  const isSelected = selectedAddressId === address.id;
-                  return (
-                    <div 
-                      key={address.id}
-                      onClick={() => setSelectedAddressId(address.id)}
-                      className={`relative cursor-pointer p-5 rounded-[12px] border-2 transition-all duration-300 ${
-                        isSelected ? 'border-[var(--color-brand)] bg-[var(--color-secondary-bg)] shadow-md' : 'border-[var(--color-border)] hover:border-[#D4AF37] bg-white'
-                      }`}
-                    >
-                      {isSelected && (
-                        <div className="absolute top-4 right-4 text-[var(--color-brand)]">
-                          <CheckCircle2 size={20} />
-                        </div>
-                      )}
-                      <h4 className="text-sm font-bold text-[var(--color-brand)] mb-1 pr-6">{address.full_name}</h4>
-                      <div className="text-sm text-[var(--color-text-main)] space-y-0.5 leading-relaxed">
-                        <p>{address.house_no}, {address.street}</p>
-                        {address.landmark && <p>{address.landmark}</p>}
-                        <p>{address.city}, {address.state} - {address.pincode}</p>
-                        <p className="pt-2 font-medium">Phone: {address.phone}</p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </section>
 
-          {/* Review Items Section */}
-          <section className="premium-card p-6 md:p-8">
-            <h2 className="text-xl font-bold text-[var(--color-brand)] flex items-center gap-3 mb-6">
-              <span className="w-7 h-7 rounded-full bg-[var(--color-brand)] text-white flex items-center justify-center text-xs">2</span>
-              Review Items
-            </h2>
-            <div className="space-y-5">
-              {items.map((item) => (
-                <div key={item.id} className="flex gap-4 items-center">
-                  <div className="w-16 h-16 rounded-[8px] bg-[var(--color-secondary-bg)] border border-[var(--color-border)] overflow-hidden flex-shrink-0">
-                    <img src={item.product.images?.[0] || item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-bold text-[var(--color-brand)] line-clamp-1">{item.product.name}</h4>
-                    <p className="text-xs text-[var(--color-muted)] mt-0.5">Qty: {item.quantity}</p>
-                  </div>
-                  <div className="text-sm font-bold text-[var(--color-brand)]">
-                    {formatPrice(item.price * item.quantity)}
-                  </div>
+              {addresses.length === 0 ? (
+                <div className="text-center py-12 bg-[#FAF8F5] rounded-none border border-[#E6E1D8]">
+                  <MapPin className="mx-auto text-gray-300 mb-4" size={32} />
+                  <p className="text-gray-500 text-sm mb-6">Where should we send your luxury pieces?</p>
+                  <Link to="/addresses" className="bg-white border border-[#E6E1D8] text-[#382135] px-8 py-3 rounded-full text-sm font-semibold hover:border-[#D4AF37] transition-colors">
+                    Add New Address
+                  </Link>
                 </div>
-              ))}
-            </div>
-            <div className="mt-6 pt-4 border-t border-[var(--color-border)] text-sm">
-              <Link to="/cart" className="text-[var(--color-accent)] font-semibold hover:text-[var(--color-brand)] flex items-center gap-1.5 w-fit transition-colors">
-                <ArrowLeft size={16} /> Back to Cart to edit items
-              </Link>
-            </div>
-          </section>
-
-        </div>
-
-        {/* Right Side - Summary */}
-        <div className="lg:w-[380px] flex-shrink-0">
-          <motion.div 
-            initial={{ opacity: 0, x: 16 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="premium-card p-6 md:p-8 sticky top-28"
-          >
-            <h2 className="text-xl font-bold text-[var(--color-brand)] mb-6">Order Summary</h2>
-            
-            <div className="space-y-4 mb-6">
-              <div className="flex justify-between text-sm">
-                <span className="text-[var(--color-muted)] font-medium">Subtotal</span>
-                <span className="font-bold text-[var(--color-brand)]">{formatPrice(subtotal)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-[var(--color-muted)] font-medium">Shipping</span>
-                <span className="font-bold text-[var(--color-brand)]">{shipping > 0 ? formatPrice(shipping) : <span className="text-green-600">Free</span>}</span>
-              </div>
-              {tax > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-[var(--color-muted)] font-medium">Tax</span>
-                  <span className="font-bold text-[var(--color-brand)]">{formatPrice(tax)}</span>
-                </div>
-              )}
-            </div>
-            
-            <div className="border-t border-[var(--color-border)] pt-5 mb-8">
-              <div className="flex justify-between items-center mb-1">
-                <span className="text-lg font-bold text-[var(--color-brand)]">Total to Pay</span>
-                <span className="text-2xl font-bold text-[var(--color-brand)]">{formatPrice(grandTotal)}</span>
-              </div>
-            </div>
-
-            <button 
-              onClick={handlePlaceOrder}
-              disabled={placingOrder || !selectedAddressId}
-              className="btn-primary w-full py-4 text-base"
-            >
-              {placingOrder ? (
-                <>
-                  <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                  Processing...
-                </>
               ) : (
-                <>Continue to Payment <ArrowRight size={18} className="ml-2" /></>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {addresses.map((address) => {
+                    const isSelected = selectedAddressId === address.id;
+                    return (
+                      <div 
+                        key={address.id}
+                        onClick={() => setSelectedAddressId(address.id)}
+                        className={`relative cursor-pointer p-6 transition-all duration-300 border ${
+                          isSelected 
+                            ? 'border-[#382135] bg-[#FAF8F5] shadow-md' 
+                            : 'border-gray-200 hover:border-[#D4AF37] bg-white'
+                        }`}
+                      >
+                        {isSelected && (
+                          <div className="absolute top-4 right-4 text-[#382135]">
+                            <CheckCircle2 size={20} strokeWidth={2.5} />
+                          </div>
+                        )}
+                        <h4 className="text-base font-bold text-[#382135] mb-2 pr-6">{address.full_name}</h4>
+                        <div className="text-sm text-gray-600 space-y-1 leading-relaxed">
+                          <p>{address.house_no}, {address.street}</p>
+                          {address.landmark && <p>{address.landmark}</p>}
+                          <p>{address.city}, {address.state} - {address.pincode}</p>
+                          <p className="pt-3 font-medium text-[#382135]">Phone: {address.phone}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
-            </button>
-            <p className="text-center text-xs text-[var(--color-muted)] mt-4 leading-relaxed">
-              You won't be charged yet. You will select your payment method in the next step.
-            </p>
-          </motion.div>
+            </section>
+
+            {/* Review Items Section */}
+            <section>
+              <h2 className="text-xl font-bold text-[#382135] uppercase tracking-wider text-sm mb-6 pb-2 border-b border-gray-100">
+                2. Review Items
+              </h2>
+              <div className="space-y-6">
+                {items.map((item) => (
+                  <div key={item.id} className="flex gap-6 items-center">
+                    <div className="w-20 h-24 bg-gray-50 overflow-hidden flex-shrink-0">
+                      <img src={typeof item.product.images?.[0] === 'object' ? item.product.images?.[0]?.image : (item.product.images?.[0] || item.product.image)} alt={item.product.name} className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-base font-bold text-[#382135] line-clamp-1" style={{ fontFamily: '"Playfair Display", serif' }}>
+                        {item.product.name}
+                      </h4>
+                      <p className="text-xs text-gray-500 uppercase tracking-widest mt-1">Qty: {item.quantity}</p>
+                    </div>
+                    <div className="text-base font-bold text-[#382135]">
+                      {formatPrice(item.price * item.quantity)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-8 pt-6 border-t border-gray-100 text-sm">
+                <Link to="/cart" className="text-xs font-bold text-gray-400 hover:text-[#382135] uppercase tracking-wider flex items-center gap-1.5 w-fit transition-colors">
+                  <ArrowLeft size={14} /> Back to Bag
+                </Link>
+              </div>
+            </section>
+
+          </div>
+
+          {/* Right Side - Summary (High Contrast Dark Theme) */}
+          <div className="lg:w-[420px] flex-shrink-0">
+            <motion.div 
+              initial={{ opacity: 0, x: 16 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="bg-[#382135] text-white p-8 lg:p-10 sticky top-28 shadow-2xl"
+            >
+              <h2 className="text-2xl font-bold text-white mb-8" style={{ fontFamily: '"Playfair Display", serif' }}>
+                Order Summary
+              </h2>
+              
+              <div className="space-y-5 mb-8 text-white/80">
+                <div className="flex justify-between text-sm">
+                  <span>Subtotal</span>
+                  <span className="font-semibold text-white">{formatPrice(subtotal)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Insured Shipping</span>
+                  <span className="font-semibold text-[#D4AF37]">{shipping > 0 ? formatPrice(shipping) : 'Complimentary'}</span>
+                </div>
+                {tax > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span>Tax (GST)</span>
+                    <span className="font-semibold text-white">{formatPrice(tax)}</span>
+                  </div>
+                )}
+              </div>
+              
+              <div className="border-t border-white/20 pt-6 mb-10">
+                <div className="flex justify-between items-end mb-1">
+                  <span className="text-sm font-bold text-white uppercase tracking-wider">Total</span>
+                  <span className="text-3xl font-bold text-[#D4AF37]" style={{ fontFamily: '"Playfair Display", serif' }}>
+                    {formatPrice(grandTotal)}
+                  </span>
+                </div>
+                <p className="text-xs text-white/50 text-right mt-2">Inclusive of all duties and taxes</p>
+              </div>
+
+              <button 
+                onClick={handlePlaceOrder}
+                disabled={placingOrder || !selectedAddressId}
+                className="w-full flex items-center justify-center gap-2 bg-white text-[#382135] font-bold py-4 hover:bg-gray-100 transition-colors uppercase tracking-widest text-xs disabled:opacity-70"
+              >
+                {placingOrder ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-[#382135]/30 border-t-[#382135] rounded-full animate-spin mr-2" />
+                    Processing...
+                  </>
+                ) : (
+                  <>Continue to Payment <ArrowRight size={16} className="ml-2" /></>
+                )}
+              </button>
+              
+              <div className="mt-8 pt-4 border-t border-white/20">
+                <div className="text-white">
+                  <LuxuryGuarantees className="border-0 pt-0" />
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </div>
     </div>

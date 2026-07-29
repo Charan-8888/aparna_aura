@@ -6,26 +6,27 @@ export const MAIN_NAV_LINKS = [
 
 export const FOOTER_SECTIONS = [
   {
-    title: 'About',
+    title: 'Our Heritage',
     links: [
-      { label: 'Our Story', path: '#' },
-      { label: 'Sustainability', path: '#' },
-      { label: 'Careers', path: '#' },
+      { label: 'The Aparna Aura Story', path: '/about' },
+      { label: 'Sustainability', path: '/about' },
+      { label: 'Careers', path: '/contact' },
     ],
   },
   {
     title: 'Customer Support',
     links: [
-      { label: 'Contact Us', path: '#' },
-      { label: 'FAQs', path: '#' },
-      { label: 'Track Order', path: '#' },
+      { label: 'Contact Concierge', path: '/contact' },
+      { label: 'Jewellery Care', path: '/care' },
+      { label: 'FAQs', path: '/faq' },
+      { label: 'Track Order', path: '/orders' },
     ],
   },
   {
     title: 'Policies',
     links: [
-      { label: 'Shipping Policy', path: '#' },
-      { label: 'Return Policy', path: '#' },
+      { label: 'Shipping & Delivery', path: '/shipping-returns' },
+      { label: 'Returns & Exchanges', path: '/shipping-returns' },
       { label: 'Privacy Policy', path: '#' },
       { label: 'Terms of Service', path: '#' },
     ],

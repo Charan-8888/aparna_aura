@@ -143,7 +143,7 @@ const Orders = () => {
                     {firstItem && (
                       <div className="w-16 h-16 rounded-xl bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-200">
                         <img 
-                          src={firstItem.product?.images?.[0] || firstItem.product?.image || 'https://images.unsplash.com/photo-1515562141589-67f0d6ce4819?w=400&h=400&fit=crop'} 
+                          src={typeof firstItem.product?.images?.[0] === 'object' ? firstItem.product?.images?.[0]?.image : (firstItem.product?.images?.[0] || firstItem.product?.image || 'https://images.unsplash.com/photo-1515562141589-67f0d6ce4819?w=400&h=400&fit=crop')} 
                           alt={firstItem.product?.name} 
                           className="w-full h-full object-cover"
                         />

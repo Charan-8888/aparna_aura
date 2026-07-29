@@ -1,15 +1,15 @@
 import React, { useRef, useState, useEffect, useCallback, memo } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Heart, ShoppingBag, Eye } from 'lucide-react';
+import { Heart, ShoppingBag } from 'lucide-react';
 import { useWishlist } from '../../hooks/useWishlist';
 import { useCart } from '../../hooks/useCart';
+import OptimizedImage from '../OptimizedImage/OptimizedImage';
 
 const formatPrice = (price) => `₹${Number(price || 0).toLocaleString('en-IN')}`;
 
 const ProductCard = memo(({ product, index = 0 }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [cartLoading, setCartLoading] = useState(false);
   const videoRef = useRef(null);
@@ -86,23 +86,21 @@ const ProductCard = memo(({ product, index = 0 }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <Link to={`/product/${product.slug}`} className="flex flex-col h-full">
-        {/* Image Container */}
+        {/* Image Container (Aspect Ratio enforced for CLS) */}
         <div className="relative aspect-[4/5] overflow-hidden bg-[var(--color-secondary-bg)]">
-          {/* Skeleton while loading */}
-          {!imageLoaded && (
-            <div className="absolute inset-0 shimmer" />
-          )}
-
-          {/* Main Image */}
+          {/* Main Image via OptimizedImage */}
           {isVisible && (
-            <img
-              src={product.images?.[0] || product.image || 'https://images.unsplash.com/photo-1515562141589-67f0d6ce4819?w=800&h=800&fit=crop'}
+            <OptimizedImage
+              src={
+                typeof product.images?.[0] === 'object'
+                  ? product.images?.[0]?.image
+                  : product.images?.[0] || product.image || 'https://images.unsplash.com/photo-1515562141589-67f0d6ce4819?w=800&h=800&fit=crop'
+              }
               alt={product.name}
               loading="lazy"
-              onLoad={() => setImageLoaded(true)}
-              className={`w-full h-full object-cover transition-transform duration-700 ease-out ${
-                imageLoaded ? 'opacity-100' : 'opacity-0'
-              } ${isHovered && product.video ? 'opacity-0' : 'opacity-100 group-hover:scale-110'}`}
+              fetchPriority="auto"
+              className={`${isHovered && product.video ? 'opacity-0' : 'group-hover:scale-110'}`}
+              containerClassName="absolute inset-0 w-full h-full"
             />
           )}
 
@@ -184,7 +182,7 @@ const ProductCard = memo(({ product, index = 0 }) => {
         {/* Product Info */}
         <div className="p-5 flex flex-col flex-1 bg-white">
           <p className="text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-widest mb-1.5">
-            {product.category}
+            {typeof product.category === 'object' ? product.category?.name : (product.category || 'Jewellery')}
           </p>
           <h3 className="text-[15px] font-medium text-[var(--color-brand)] line-clamp-1 group-hover:text-[var(--color-accent)] transition-colors duration-300 mb-2">
             {product.name}
