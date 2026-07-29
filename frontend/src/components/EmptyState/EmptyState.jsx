@@ -11,18 +11,22 @@ const EmptyState = ({
     <motion.div 
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center justify-center p-12 text-center"
+      className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center"
     >
-      {Icon && (
-        <div className="w-20 h-20 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6 text-[#382135] dark:text-[#D4AF37]">
-          <Icon size={40} strokeWidth={1.5} />
-        </div>
-      )}
-      <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+      <div className="relative mb-8">
+        <div className="absolute inset-0 bg-[var(--color-brand)]/5 rounded-full scale-[1.5]" />
+        <div className="absolute inset-0 bg-[var(--color-accent)]/10 rounded-full scale-[1.2]" />
+        {Icon && (
+          <div className="relative w-24 h-24 bg-white shadow-sm border border-[var(--color-border)] rounded-full flex items-center justify-center text-[var(--color-brand)] z-10">
+            <Icon size={40} strokeWidth={1.5} />
+          </div>
+        )}
+      </div>
+      <h3 className="text-2xl font-heading font-bold text-[var(--color-brand)] mb-3">
         {title}
       </h3>
       {description && (
-        <p className="text-gray-500 dark:text-gray-400 max-w-sm mb-6">
+        <p className="text-[var(--color-muted)] text-base max-w-sm mb-8 leading-relaxed">
           {description}
         </p>
       )}
