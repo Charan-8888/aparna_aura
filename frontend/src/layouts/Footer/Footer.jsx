@@ -13,14 +13,14 @@ const TRUST_BADGES = [
 
 const Footer = () => {
   return (
-    <footer className="relative bg-[#1a1a2e] text-white">
+    <footer className="relative mt-8 bg-[#301b2f] text-white">
       {/* Trust Badges Bar */}
       <div className="border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 py-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {TRUST_BADGES.map(({ icon: Icon, label, desc }) => (
               <div key={label} className="flex items-center gap-3 group">
-                <div className="w-11 h-11 rounded-xl bg-[#D4AF37]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#D4AF37]/20 transition-colors duration-300">
+                <div className="w-11 h-11 rounded-full bg-[#D4AF37]/10 flex items-center justify-center flex-shrink-0 group-hover:bg-[#D4AF37]/20 transition-colors duration-300">
                   <Icon size={20} className="text-[#D4AF37]" />
                 </div>
                 <div>
@@ -37,12 +37,12 @@ const Footer = () => {
       <div className="gold-divider" />
 
       {/* Main Footer Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 pt-20 pb-9">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8 mb-12">
 
           {/* Brand & Newsletter */}
           <div className="lg:col-span-2">
-            <Link to="/" className="text-3xl font-bold font-heading text-[#D4AF37] tracking-wider mb-6 inline-block">
+            <Link to="/" className="text-4xl font-medium font-heading text-[#f1d593] tracking-wide mb-6 inline-block">
               {APP_NAME}
             </Link>
             <p className="text-white/50 mb-8 max-w-md leading-relaxed text-sm">
@@ -50,16 +50,16 @@ const Footer = () => {
             </p>
 
             <div className="mb-8">
-              <h4 className="text-xs font-bold text-white/70 uppercase tracking-[0.2em] mb-4">
+              <h4 className="text-[10px] font-bold text-white/70 uppercase tracking-[0.22em] mb-4">
                 Subscribe to our Newsletter
               </h4>
               <div className="flex">
                 <input
                   type="email"
                   placeholder="Enter your email"
-                  className="bg-white/5 border border-white/10 rounded-l-xl px-4 py-3 w-full focus:outline-none focus:border-[#D4AF37] text-white placeholder:text-white/30 text-sm transition-colors"
+                  className="bg-white/5 border border-white/10 rounded-l-full px-5 py-3.5 w-full focus:outline-none focus:border-[#D4AF37] text-white placeholder:text-white/30 text-sm transition-colors"
                 />
-                <button className="bg-[#D4AF37] hover:bg-[#e0c55c] text-[#382135] px-5 py-3 rounded-r-xl transition-colors flex items-center justify-center font-semibold">
+                <button className="bg-[#D4AF37] hover:bg-[#e0c55c] text-[#382135] px-5 py-3 rounded-r-full transition-colors flex items-center justify-center font-semibold">
                   <ArrowRight size={18} />
                 </button>
               </div>
@@ -87,7 +87,7 @@ const Footer = () => {
           {/* Links Sections */}
           {FOOTER_SECTIONS.map((section, idx) => (
             <div key={idx}>
-              <h4 className="text-xs font-bold text-white/70 uppercase tracking-[0.2em] mb-6">
+              <h4 className="text-[10px] font-bold text-white/70 uppercase tracking-[0.22em] mb-6">
                 {section.title}
               </h4>
               <ul className="space-y-3.5">

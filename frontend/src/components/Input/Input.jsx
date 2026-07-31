@@ -15,7 +15,7 @@ const Input = forwardRef(({
   return (
     <div className={`w-full ${className}`}>
       {label && (
-        <label htmlFor={inputId} className="block text-sm font-medium text-[#2C2C2C] mb-1.5">
+        <label htmlFor={inputId} className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#5f5651] mb-2">
           {label}
         </label>
       )}
@@ -29,8 +29,8 @@ const Input = forwardRef(({
           type={type}
           className={`
             w-full ${Icon ? 'pl-10' : 'pl-4'} pr-4 py-3 
-            rounded-[12px] border border-[#E6E1D8] bg-[#FAF8F5] text-[#1A1A1A] text-sm
-            shadow-sm transition-all duration-300
+            rounded-[3px] border border-[#E7DFD3] bg-white text-[#1A1A1A] text-sm
+            shadow-none transition-all duration-300
             placeholder:text-[#8A8A8A]
             focus:outline-none focus:ring-2 focus:ring-[#C9A227] focus:border-transparent
             disabled:cursor-not-allowed disabled:opacity-50

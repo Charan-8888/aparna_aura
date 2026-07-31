@@ -100,17 +100,18 @@ const Products = () => {
   const totalPages = Math.ceil((pagination.count || 0) / ITEMS_PER_PAGE);
 
   return (
-    <div className="bg-white min-h-screen pb-20">
+    <div className="luxury-page min-h-screen pb-24">
       {/* Editorial Header */}
-      <div className="relative bg-[#382135] pt-24 pb-20 px-4 overflow-hidden">
+      <div className="relative bg-[#301b2f] pt-28 pb-24 px-4 overflow-hidden">
         {/* Subtle texture overlay */}
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#D4AF37 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
         <div className="relative z-10 max-w-7xl mx-auto text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4" style={{ fontFamily: '"Playfair Display", serif' }}>
+            <p className="eyebrow text-[#d8b979] mb-5">Fine jewellery, considered</p>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-medium text-white mb-5" style={{ fontFamily: '"Playfair Display", serif' }}>
               {filters.category ? categories?.find(c => c.slug === filters.category)?.name || 'The Collection' : 'The Signature Collection'}
             </h1>
-            <p className="text-white/70 max-w-2xl mx-auto text-sm md:text-base leading-relaxed mb-8">
+            <p className="text-white/65 max-w-xl mx-auto text-sm md:text-base leading-7 mb-10">
               Discover our exquisite range of handcrafted jewellery. Each piece tells a story of timeless elegance and unparalleled craftsmanship.
             </p>
             
@@ -134,11 +135,11 @@ const Products = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10 mt-8">
         <Breadcrumb items={[{ label: 'Shop', path: '/products' }]} />
         
         {/* Toolbar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between py-6 mb-8 border-b border-gray-100 gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between py-7 mb-10 border-b border-[#e7dfd3] gap-4">
           <p className="text-sm font-medium text-gray-500">
             {!loading && !error ? `Showing ${products.length} of ${pagination.count} results` : 'Loading...'}
           </p>

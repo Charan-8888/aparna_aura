@@ -26,11 +26,11 @@ const Pagination = memo(({ currentPage = 1, totalPages = 1, onPageChange }) => {
   };
 
   return (
-    <nav className="flex items-center justify-center gap-1 mt-12">
+    <nav className="flex items-center justify-center gap-2 mt-14">
       <button
         onClick={() => onPageChange?.(currentPage - 1)}
         disabled={currentPage === 1}
-        className="p-2.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-[#382135] hover:text-white hover:border-[#382135] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-600 disabled:hover:border-gray-200 transition-all duration-200"
+        className="p-2.5 rounded-full border border-[#E7DFD3] text-gray-600 hover:bg-[#301b2f] hover:text-white hover:border-[#301b2f] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-600 disabled:hover:border-gray-200 transition-all duration-200"
       >
         <ChevronLeft size={18} />
       </button>
@@ -44,10 +44,10 @@ const Pagination = memo(({ currentPage = 1, totalPages = 1, onPageChange }) => {
           <button
             key={page}
             onClick={() => onPageChange?.(page)}
-            className={`min-w-[40px] h-10 rounded-lg font-medium text-sm transition-all duration-200 ${
+            className={`min-w-[40px] h-10 rounded-full font-medium text-sm transition-all duration-200 ${
               page === currentPage
-                ? 'bg-[#382135] text-white shadow-lg'
-                : 'border border-gray-200 text-gray-600 hover:bg-[#382135] hover:text-white hover:border-[#382135]'
+                ? 'bg-[#301b2f] text-white shadow-none'
+                : 'border border-[#E7DFD3] text-gray-600 hover:bg-[#301b2f] hover:text-white hover:border-[#301b2f]'
             }`}
           >
             {page}
@@ -58,7 +58,7 @@ const Pagination = memo(({ currentPage = 1, totalPages = 1, onPageChange }) => {
       <button
         onClick={() => onPageChange?.(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="p-2.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-[#382135] hover:text-white hover:border-[#382135] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-600 disabled:hover:border-gray-200 transition-all duration-200"
+        className="p-2.5 rounded-full border border-[#E7DFD3] text-gray-600 hover:bg-[#301b2f] hover:text-white hover:border-[#301b2f] disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-600 disabled:hover:border-gray-200 transition-all duration-200"
       >
         <ChevronRight size={18} />
       </button>

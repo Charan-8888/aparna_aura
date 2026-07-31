@@ -32,9 +32,9 @@ const ImageGallery = memo(({ images = [], video = null, productName = '' }) => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Main Image / Video */}
-      <div className="relative aspect-square overflow-hidden rounded-2xl bg-gray-50 group">
+      <div className="relative aspect-square overflow-hidden rounded-sm bg-[#f3efe8] group">
         <AnimatePresence mode="wait">
           {showVideo && video ? (
             <motion.div

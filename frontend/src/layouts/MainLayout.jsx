@@ -18,7 +18,7 @@ const MainLayout = () => {
   const location = useLocation();
 
   return (
-    <div className="flex flex-col min-h-screen bg-[var(--color-background)] text-[var(--color-text-main)] transition-colors duration-300">
+    <div className="flex flex-col min-h-screen bg-[#fcfbf8] text-[var(--color-text-main)] transition-colors duration-300">
       <ScrollReset />
       <Navbar />
       
@@ -26,7 +26,7 @@ const MainLayout = () => {
         Main content area wrapper.
         The top padding accounts for the fixed navbar height.
       */}
-      <main className="flex-grow pt-24 pb-12">
+      <main className="flex-grow pt-28 pb-16">
         <Suspense fallback={<Loader fullScreen />}>
           <AnimatePresence mode="wait">
             <motion.div

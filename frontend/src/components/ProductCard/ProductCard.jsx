@@ -93,13 +93,13 @@ const ProductCard = memo(({ product, index = 0 }) => {
       initial={{ opacity: 0, y: 30 }}
       animate={isVisible ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5, delay: index * 0.08 }}
-      className="group relative bg-white rounded-[16px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-[#E6E1D8] transition-all duration-500 overflow-hidden flex flex-col"
+      className="group relative bg-transparent border-0 transition-all duration-500 overflow-hidden flex flex-col"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <Link to={`/product/${product.slug}`} className="flex flex-col h-full">
         {/* Image Container (Aspect Ratio enforced for CLS) */}
-        <div className="relative aspect-[4/5] overflow-hidden bg-[var(--color-secondary-bg)]">
+        <div className="relative aspect-[4/5] overflow-hidden bg-[#f2eee8]">
           {/* Main Image via OptimizedImage */}
           {isVisible && (
             <OptimizedImage
@@ -131,9 +131,9 @@ const ProductCard = memo(({ product, index = 0 }) => {
           <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
           {/* Badges */}
-          <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
+          <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
             {discount > 0 && (
-              <span className="bg-[var(--color-accent)] text-white text-[10px] uppercase font-bold px-3 py-1.5 rounded-[8px] shadow-sm tracking-wider">
+              <span className="bg-white/95 text-[#301b2f] text-[9px] uppercase font-bold px-3 py-1.5 tracking-[0.16em]">
                 -{discount}%
               </span>
             )}
@@ -154,12 +154,12 @@ const ProductCard = memo(({ product, index = 0 }) => {
             initial={{ opacity: 0, y: 15 }}
             animate={isHovered ? { opacity: 1, y: 0 } : { opacity: 0, y: 15 }}
             transition={{ duration: 0.3 }}
-            className="absolute bottom-4 left-0 right-0 flex justify-center gap-3 z-10 px-4"
+            className="absolute bottom-3 left-0 right-0 flex justify-center gap-2 z-10 px-3"
           >
             {/* Wishlist Toggle */}
             <button
               onClick={handleWishlistToggle}
-              className={`p-3 rounded-full shadow-lg backdrop-blur-md transition-all duration-300 transform hover:scale-110 ${
+              className={`p-3 rounded-full shadow-sm backdrop-blur-md transition-all duration-300 transform hover:scale-110 ${
                 wishlisted
                   ? 'bg-red-500 text-white'
                   : 'bg-white/95 text-[var(--color-brand)] hover:bg-[var(--color-accent)] hover:text-white'
@@ -173,7 +173,7 @@ const ProductCard = memo(({ product, index = 0 }) => {
             <button
               onClick={handleAddToCart}
               disabled={cartLoading}
-              className="px-5 py-3 rounded-full bg-white/95 text-[var(--color-brand)] shadow-lg backdrop-blur-md hover:bg-[var(--color-brand)] hover:text-white transition-all duration-300 disabled:opacity-60 font-semibold text-sm flex items-center gap-2 flex-1 justify-center transform hover:scale-105"
+              className="px-5 py-3 rounded-full bg-white/95 text-[var(--color-brand)] shadow-sm backdrop-blur-md hover:bg-[var(--color-brand)] hover:text-white transition-all duration-300 disabled:opacity-60 font-semibold text-sm flex items-center gap-2 flex-1 justify-center transform hover:scale-105"
               title="Add to cart"
             >
               {cartLoading ? (
@@ -188,17 +188,17 @@ const ProductCard = memo(({ product, index = 0 }) => {
         </div>
 
         {/* Product Info */}
-        <div className="p-5 flex flex-col flex-1 bg-white">
-          <p className="text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-widest mb-1.5">
+        <div className="px-1 pt-4 pb-3 flex flex-col flex-1 bg-transparent">
+          <p className="text-[9px] text-[#9b8f85] font-bold uppercase tracking-[0.18em] mb-2">
             {typeof product.category === 'object' ? product.category?.name : (product.category || 'Jewellery')}
           </p>
-          <h3 className="text-[15px] font-medium text-[var(--color-brand)] line-clamp-1 group-hover:text-[var(--color-accent)] transition-colors duration-300 mb-2">
+          <h3 className="font-heading text-xl font-medium text-[var(--color-brand)] line-clamp-1 group-hover:text-[var(--color-accent)] transition-colors duration-300 mb-3">
             {product.name}
           </h3>
           
           <div className="mt-auto">
             <div className="flex items-center gap-2 mb-1.5">
-              <span className="text-lg font-bold text-[var(--color-brand)] tracking-tight">
+              <span className="text-base font-semibold text-[var(--color-brand)] tracking-tight">
                 {formatPrice(product.price)}
               </span>
               {(product.originalPrice || product.original_price) > product.price && (

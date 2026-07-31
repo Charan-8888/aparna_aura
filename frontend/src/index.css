@@ -1,23 +1,23 @@
 @import "tailwindcss";
 
 @theme {
-  --font-heading: "Playfair Display", serif;
+  --font-heading: "Playfair Display", Georgia, serif;
   --font-body: "Inter", sans-serif;
 
   /* Premium Luxury Palette */
-  --color-brand: #382135;
-  --color-brand-light: #4D2C48;
-  --color-brand-dark: #2a1827;
-  --color-accent: #C9A227;
-  --color-accent-light: #D4AF37; 
+  --color-brand: #301b2f;
+  --color-brand-light: #53374f;
+  --color-brand-dark: #1e101d;
+  --color-accent: #a77d32;
+  --color-accent-light: #c69a45;
   --color-accent-dark: #b5952f;
   
-  --color-background: #FAF8F5;
-  --color-secondary-bg: #F3EFE8;
+  --color-background: #fcfbf8;
+  --color-secondary-bg: #f4f0e9;
   --color-surface: #FFFFFF;
   --color-muted: #6F6F6F;
-  --color-border: #E6E1D8;
-  --color-text-main: #2C2C2C;
+  --color-border: #e7dfd3;
+  --color-text-main: #282322;
   --color-dark-section: #121212;
 }
 
@@ -44,12 +44,15 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+    letter-spacing: -0.01em;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
     color: var(--color-brand);
   }
+
+  ::selection { background: #e9d6ae; color: #301b2f; }
 
   img {
     user-select: none;
@@ -160,8 +163,8 @@
 
 @layer utilities {
   .section-padding {
-    padding-top: 30px;
-    padding-bottom: 30px;
+    padding-top: 4rem;
+    padding-bottom: 4rem;
   }
   
   @media (min-width: 768px) {
@@ -266,11 +269,11 @@
 @layer components {
   /* ── Buttons ── */
   .btn-primary {
-    @apply inline-flex items-center justify-center bg-[#382135] text-white font-semibold rounded-[12px] px-6 py-3 transition-all duration-300 shadow-md focus:outline-none focus:ring-2 focus:ring-[#C9A227] focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed hover:bg-[#4D2C48] hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0;
+    @apply inline-flex items-center justify-center bg-[#301b2f] text-white font-semibold rounded-full px-6 py-3 transition-all duration-300 shadow-none focus:outline-none focus:ring-2 focus:ring-[#C9A227] focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed hover:bg-[#53374f] hover:-translate-y-0.5 active:translate-y-0;
   }
   
   .btn-secondary {
-    @apply inline-flex items-center justify-center bg-white text-[#382135] font-semibold rounded-[12px] px-6 py-3 border-2 border-[#E6E1D8] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#C9A227] focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed hover:border-[#D4AF37] hover:text-[#D4AF37] hover:shadow-md hover:-translate-y-0.5 active:translate-y-0;
+    @apply inline-flex items-center justify-center bg-white text-[#301b2f] font-semibold rounded-full px-6 py-3 border border-[#E7DFD3] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[#C9A227] focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed hover:border-[#A77D32] hover:text-[#A77D32] hover:-translate-y-0.5 active:translate-y-0;
   }
 
   .btn-gold {
@@ -279,7 +282,7 @@
 
   /* ── Cards ── */
   .premium-card {
-    @apply bg-white rounded-[16px] shadow-sm border border-[#E6E1D8] transition-all duration-300 hover:shadow-xl overflow-hidden;
+    @apply bg-white rounded-[2px] shadow-none border border-[#E7DFD3] transition-all duration-300 hover:shadow-[0_18px_42px_rgba(48,27,47,0.08)] overflow-hidden;
   }
 
   .premium-card-gold {
@@ -302,5 +305,23 @@
   /* ── Toast ── */
   .toast-progress {
     animation: toast-progress 4s linear forwards;
+  }
+
+  .eyebrow {
+    color: #a77d32;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+  }
+
+  .editorial-rule {
+    width: 2.5rem;
+    height: 1px;
+    background: #a77d32;
+  }
+
+  .luxury-page {
+    background: radial-gradient(circle at 100% 0%, #f4ede1 0%, transparent 28rem), #fcfbf8;
   }
 }
