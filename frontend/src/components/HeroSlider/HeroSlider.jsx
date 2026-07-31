@@ -19,7 +19,9 @@ const SLIDES = [
     subtitle: 'Wedding Season Exclusive',
     description: 'Make your special day unforgettable with our stunning bridal jewellery collection crafted for royalty.',
     cta: 'View Bridal Sets',
-    ctaLink: '/categories/bridal',
+    // Search rather than linking to a hard-coded category slug. Categories are
+    // managed in Django, so a missing "bridal" category must not produce a 404.
+    ctaLink: '/products?search=bridal',
     image: 'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=1600&h=900&fit=crop',
   },
   {
@@ -28,7 +30,8 @@ const SLIDES = [
     subtitle: 'Certified Brilliance',
     description: 'Each diamond is hand-selected for exceptional clarity, cut, and fire. Experience true luxury with Aparna Aura.',
     cta: 'Explore Diamonds',
-    ctaLink: '/categories/rings',
+    // Keep this independent of the current category records for the same reason.
+    ctaLink: '/products?search=diamond',
     image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=1600&h=900&fit=crop',
   },
 ];
