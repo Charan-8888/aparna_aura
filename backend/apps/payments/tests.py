@@ -1,5 +1,56 @@
-from django.test import TestCase
+import hashlib
+import hmac
+import json
+
+from django.contrib.auth import get_user_model
+from django.test import TestCase, override_settings
+from apps.orders.models import Order
+from .models import Transaction
 from rest_framework.test import APITestCase
+
+User = get_user_model()
+
+
+@override_settings(RAZORPAY_WEBHOOK_SECRET='test-webhook-secret-that-is-long-enough')
+class RazorpayWebhookTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            email='webhook@example.com', password='WebhookPassword123!', first_name='Webhook', last_name='Test',
+        )
+        self.order = Order.objects.create(user=self.user, total_amount='1200.00')
+        self.transaction = Transaction.objects.create(
+            order=self.order, amount='1200.00', payment_gateway='razorpay', payment_method='CARD',
+            razorpay_order_id='order_webhook_test', status='pending',
+        )
+
+    def _post_event(self, event_name, signature=None):
+        payload = json.dumps({
+            'event': event_name,
+            'payload': {'payment': {'entity': {
+                'id': 'pay_webhook_test', 'order_id': 'order_webhook_test', 'method': 'upi',
+            }}},
+        }).encode('utf-8')
+        signature = signature or hmac.new(
+            b'test-webhook-secret-that-is-long-enough', payload, hashlib.sha256,
+        ).hexdigest()
+        return self.client.post(
+            '/api/v1/payments/webhook/razorpay/', payload,
+            content_type='application/json', HTTP_X_RAZORPAY_SIGNATURE=signature,
+        )
+
+    def test_captured_webhook_is_signed_and_idempotent(self):
+        self.assertEqual(self._post_event('payment.captured').status_code, 200)
+        self.assertEqual(self._post_event('payment.captured').status_code, 200)
+        self.transaction.refresh_from_db()
+        self.order.refresh_from_db()
+        self.assertEqual(self.transaction.status, 'success')
+        self.assertEqual(self.transaction.payment_method, 'UPI')
+        self.assertEqual(self.order.status, 'confirmed')
+
+    def test_invalid_webhook_signature_is_rejected(self):
+        self.assertEqual(self._post_event('payment.captured', signature='invalid').status_code, 400)
+        self.transaction.refresh_from_db()
+        self.assertEqual(self.transaction.status, 'pending')
 
 
 class RazorpayCreateTests(TestCase):

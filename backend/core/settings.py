@@ -173,6 +173,9 @@ REST_FRAMEWORK = {
         'password_reset': os.getenv('PASSWORD_RESET_RATE_LIMIT', '3/hour'),
         'password_reset_confirm': os.getenv('PASSWORD_RESET_CONFIRM_RATE_LIMIT', '5/hour'),
         'google_login': os.getenv('GOOGLE_LOGIN_RATE_LIMIT', '10/minute'),
+        'payment_create': os.getenv('PAYMENT_CREATE_RATE_LIMIT', '10/minute'),
+        'payment_verify': os.getenv('PAYMENT_VERIFY_RATE_LIMIT', '10/minute'),
+        'payment_cod': os.getenv('PAYMENT_COD_RATE_LIMIT', '5/minute'),
     },
 }
 
@@ -238,6 +241,7 @@ cloudinary.config(
 # Razorpay
 RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID')
 RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET')
+RAZORPAY_WEBHOOK_SECRET = os.environ.get('RAZORPAY_WEBHOOK_SECRET', '')
 
 # Google Identity Services
 GOOGLE_OAUTH_CLIENT_ID = os.environ.get('GOOGLE_OAUTH_CLIENT_ID')

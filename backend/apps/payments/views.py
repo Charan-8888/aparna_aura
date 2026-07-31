@@ -1,4 +1,11 @@
-from rest_framework.permissions import IsAuthenticated
+import json
+
+from django.conf import settings
+from django.http import HttpResponseBadRequest
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from core.responses import success_response, created_response
@@ -13,6 +20,8 @@ from .services import (
     verify_razorpay_payment,
     process_cod,
     get_transaction_detail,
+    process_razorpay_webhook,
+    verify_razorpay_webhook_signature,
 )
 
 
@@ -23,6 +32,8 @@ class RazorpayCreateView(APIView):
     Returns the data needed by the frontend to open Razorpay checkout.
     """
     permission_classes = [IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'payment_create'
 
     def post(self, request):
         serializer = RazorpayCreateSerializer(data=request.data)
@@ -41,6 +52,8 @@ class RazorpayVerifyView(APIView):
     Verify the Razorpay payment signature after the user completes payment.
     """
     permission_classes = [IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'payment_verify'
 
     def post(self, request):
         serializer = RazorpayVerifySerializer(data=request.data)
@@ -62,6 +75,8 @@ class CODCreateView(APIView):
     Select Cash on Delivery for the given Order.
     """
     permission_classes = [IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'payment_cod'
 
     def post(self, request):
         serializer = CODSerializer(data=request.data)
@@ -89,3 +104,28 @@ class TransactionDetailView(APIView):
         )
         output = TransactionSerializer(txn)
         return success_response(data=output.data, message="Transaction retrieved.")
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class RazorpayWebhookView(APIView):
+    """Razorpay server-to-server webhook; accepts only valid signed payloads."""
+
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    throttle_classes = []
+
+    def post(self, request):
+        signature = request.headers.get('X-Razorpay-Signature', '')
+        if not settings.RAZORPAY_WEBHOOK_SECRET:
+            return HttpResponseBadRequest('Webhook is not configured.')
+        if not verify_razorpay_webhook_signature(request.body, signature):
+            return HttpResponseBadRequest('Invalid webhook signature.')
+
+        try:
+            event = json.loads(request.body.decode('utf-8'))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            return HttpResponseBadRequest('Invalid webhook payload.')
+
+        process_razorpay_webhook(event)
+        # Razorpay requires a quick 2xx response. Processing is idempotent.
+        return success_response(message='Webhook accepted.')

@@ -7,6 +7,8 @@ All amount calculations are derived from the Order — never from the frontend.
 """
 
 import logging
+import hashlib
+import hmac
 from decimal import Decimal
 
 import razorpay
@@ -200,6 +202,11 @@ def process_cod(user, order_id):
             'payment_gateway': 'cod',
             'status': 'pending',
             'amount': order.total_amount,
+            'transaction_id': None,
+            'razorpay_order_id': None,
+            'razorpay_payment_id': None,
+            'razorpay_signature': None,
+            'response_payload': None,
         },
     )
 
@@ -218,3 +225,59 @@ def get_transaction_detail(user, transaction_id):
         )
     except Transaction.DoesNotExist:
         raise ValidationError({"transaction": "Transaction not found."})
+
+
+def verify_razorpay_webhook_signature(payload, signature):
+    """Validate Razorpay's HMAC on the exact raw request body."""
+    secret = settings.RAZORPAY_WEBHOOK_SECRET
+    if not secret or not signature:
+        return False
+    expected = hmac.new(secret.encode('utf-8'), payload, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(expected, signature)
+
+
+def _payment_method_from_razorpay(value):
+    return {
+        'upi': 'UPI', 'card': 'CARD', 'netbanking': 'NETBANKING', 'wallet': 'WALLET',
+    }.get((value or '').lower(), 'CARD')
+
+
+@transaction.atomic
+def process_razorpay_webhook(event):
+    """Apply captured/failed events safely; duplicate deliveries are harmless."""
+    event_name = event.get('event')
+    payment = event.get('payload', {}).get('payment', {}).get('entity', {})
+    razorpay_order_id = payment.get('order_id')
+    if not razorpay_order_id:
+        return
+
+    try:
+        txn = Transaction.objects.select_for_update().select_related('order').get(
+            razorpay_order_id=razorpay_order_id,
+            payment_gateway='razorpay',
+        )
+    except Transaction.DoesNotExist:
+        logger.warning('Ignoring Razorpay webhook for an unknown order.')
+        return
+
+    if event_name == 'payment.captured':
+        # A duplicate captured event or a later failed event must never undo success.
+        if txn.status == 'success':
+            return
+        if payment.get('amount') is not None and payment['amount'] != int(txn.amount * 100):
+            logger.error('Ignoring Razorpay webhook with an unexpected payment amount.')
+            return
+        txn.status = 'success'
+        txn.payment_method = _payment_method_from_razorpay(payment.get('method'))
+        txn.razorpay_payment_id = payment.get('id') or txn.razorpay_payment_id
+        txn.transaction_id = txn.razorpay_payment_id
+        txn.response_payload = {'event': event_name, 'payment_id': txn.razorpay_payment_id}
+        txn.save()
+        if txn.order.status == 'pending':
+            txn.order.status = 'confirmed'
+            txn.order.save(update_fields=['status', 'updated_at'])
+    elif event_name == 'payment.failed' and txn.status != 'success':
+        txn.status = 'failed'
+        txn.razorpay_payment_id = payment.get('id') or txn.razorpay_payment_id
+        txn.response_payload = {'event': event_name, 'payment_id': txn.razorpay_payment_id}
+        txn.save(update_fields=['status', 'razorpay_payment_id', 'response_payload', 'updated_at'])

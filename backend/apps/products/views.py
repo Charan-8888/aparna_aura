@@ -3,7 +3,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from apps.users.permissions import IsStaffOrAdmin
 from .models import Category, Product
-from .serializers import CategorySerializer, ProductSerializer
+from .serializers import CategorySerializer, ProductSerializer, StaffProductSerializer
 from .filters import ProductFilter
 from .services import get_active_categories, get_active_products
 
@@ -28,6 +28,12 @@ class ProductViewSet(viewsets.ModelViewSet):
     filterset_class = ProductFilter
     search_fields = ['name', 'sku', 'meta_title', 'meta_description']
     ordering_fields = ['price', 'created_at', 'name']
+
+    def get_serializer_class(self):
+        user = self.request.user
+        if user.is_authenticated and (user.role in ['staff', 'admin'] or user.is_staff):
+            return StaffProductSerializer
+        return ProductSerializer
     
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
