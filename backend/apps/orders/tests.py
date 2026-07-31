@@ -1,5 +1,9 @@
+from django.contrib.auth import get_user_model
 from django.test import TestCase
+from .models import Order
 from rest_framework.test import APITestCase
+
+User = get_user_model()
 
 class OrderModelTests(TestCase):
     def test_order_creation_stub(self):
@@ -41,6 +45,15 @@ class OrderCancellationServiceTests(TestCase):
         self.assertTrue(True)
 
 class OrderAPITests(APITestCase):
+    def setUp(self):
+        self.owner = User.objects.create_user(
+            email='order-owner@example.com', password='OwnerPassword123!', first_name='Owner', last_name='Example'
+        )
+        self.other_user = User.objects.create_user(
+            email='order-other@example.com', password='OtherPassword123!', first_name='Other', last_name='Example'
+        )
+        self.order = Order.objects.create(user=self.owner, total_amount='100.00')
+
     def test_checkout_api_stub(self):
         # TODO: Test POST /orders/checkout/ returns 201 Created
         self.assertTrue(True)
@@ -60,3 +73,13 @@ class OrderAPITests(APITestCase):
     def test_unauthenticated_access_stub(self):
         # TODO: Test accessing any endpoint without auth returns 401
         self.assertTrue(True)
+
+    def test_other_customer_cannot_read_or_cancel_order_by_uuid(self):
+        self.client.force_authenticate(self.other_user)
+        detail_url = f'/api/v1/orders/{self.order.id}/'
+        cancel_url = f'/api/v1/orders/{self.order.id}/cancel/'
+
+        self.assertEqual(self.client.get(detail_url).status_code, 404)
+        self.assertEqual(self.client.post(cancel_url, {}, format='json').status_code, 400)
+        self.order.refresh_from_db()
+        self.assertEqual(self.order.status, 'pending')

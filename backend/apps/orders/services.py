@@ -103,6 +103,7 @@ def checkout(user, shipping_address_id, billing_address_id=None):
 
     return order
 
+@transaction.atomic
 def cancel_order(user, order_id):
     """
     Cancels an order if it is in 'pending' or 'confirmed' status.
@@ -117,25 +118,24 @@ def cancel_order(user, order_id):
     if order.status not in ['pending', 'confirmed']:
         raise ValidationError({"status": f"Cannot cancel an order with status '{order.status}'."})
 
-    with transaction.atomic():
-        # Lock products to refund stock
-        items = order.items.select_related('product')
-        product_ids = [item.product_id for item in items]
-        products = Product.objects.select_for_update().filter(id__in=product_ids).order_by('id')
-        product_map = {p.id: p for p in products}
+    # Lock products to refund stock
+    items = order.items.select_related('product')
+    product_ids = [item.product_id for item in items]
+    products = Product.objects.select_for_update().filter(id__in=product_ids).order_by('id')
+    product_map = {p.id: p for p in products}
 
-        products_to_update = []
-        for item in items:
-            product = product_map.get(item.product_id)
-            if product:
-                product.stock += item.quantity
-                products_to_update.append(product)
+    products_to_update = []
+    for item in items:
+        product = product_map.get(item.product_id)
+        if product:
+            product.stock += item.quantity
+            products_to_update.append(product)
 
-        if products_to_update:
-            Product.objects.bulk_update(products_to_update, ['stock'])
+    if products_to_update:
+        Product.objects.bulk_update(products_to_update, ['stock'])
 
-        # Update order status
-        order.status = 'cancelled'
-        order.save(update_fields=['status', 'updated_at'])
+    # Update order status
+    order.status = 'cancelled'
+    order.save(update_fields=['status', 'updated_at'])
 
     return order

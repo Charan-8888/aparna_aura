@@ -5,6 +5,7 @@ from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .services import reset_password
+from .models import Address
 
 
 User = get_user_model()
@@ -65,3 +66,29 @@ class PasswordResetTests(TestCase):
         self.client.force_authenticate(user=None)
         response = self.client.post('/api/v1/auth/refresh/', {'refresh': str(refresh)}, format='json')
         self.assertEqual(response.status_code, 401)
+
+
+class AddressOwnershipTests(TestCase):
+    """Changing an address UUID must never expose another customer's data."""
+
+    def setUp(self):
+        self.owner = User.objects.create_user(
+            email='owner@example.com', password='OwnerPassword123!', first_name='Owner', last_name='Example'
+        )
+        self.other_user = User.objects.create_user(
+            email='other@example.com', password='OtherPassword123!', first_name='Other', last_name='Example'
+        )
+        self.address = Address.objects.create(
+            user=self.owner,
+            full_name='Owner Example', phone='+919876543210', house_no='1', street='Private Street',
+            city='Hyderabad', state='Telangana', pincode='500001', country='India',
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(self.other_user)
+
+    def test_other_customer_cannot_read_or_modify_address_by_uuid(self):
+        detail_url = f'/api/v1/auth/addresses/{self.address.id}/'
+        self.assertEqual(self.client.get(detail_url).status_code, 404)
+        self.assertEqual(self.client.patch(detail_url, {'city': 'Changed'}, format='json').status_code, 404)
+        self.address.refresh_from_db()
+        self.assertEqual(self.address.city, 'Hyderabad')

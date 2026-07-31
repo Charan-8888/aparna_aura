@@ -9,7 +9,7 @@ class CategoryService {
   async getCategories() {
     const response = await apiClient.get(API_ENDPOINTS.CATEGORIES);
     // Handle both paginated { results: [] } and plain array responses
-    const data = response.data;
+    const data = response.data?.data ?? response.data;
     if (data && Array.isArray(data.results)) {
       return data.results;
     }
@@ -26,7 +26,7 @@ class CategoryService {
    */
   async getCategory(slug) {
     const response = await apiClient.get(`${API_ENDPOINTS.CATEGORIES}${slug}/`);
-    return response.data;
+    return response.data?.data ?? response.data;
   }
 }
 

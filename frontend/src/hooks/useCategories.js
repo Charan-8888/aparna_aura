@@ -22,7 +22,7 @@ export const useCategories = (slug = null) => {
         // categoryService.getCategories() already returns a normalized array
         response = await categoryService.getCategories();
       }
-      setData(response);
+      setData(catSlug ? response : (Array.isArray(response) ? response : []));
     } catch (err) {
       console.error('Failed to fetch categories:', err);
       setError(err.response?.data?.detail || err.message || 'An error occurred while fetching categories.');

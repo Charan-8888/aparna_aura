@@ -34,6 +34,7 @@ const Products = () => {
 
   const { products, pagination, loading, error, retry } = useProducts(filters);
   const { categories } = useCategories();
+  const categoryList = Array.isArray(categories) ? categories : [];
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -217,7 +218,7 @@ const Products = () => {
               >
                 All Pieces
               </button>
-              {categories?.map((cat) => (
+              {categoryList.map((cat) => (
                 <button
                   key={cat.slug}
                   onClick={() => setFilters(prev => ({ ...prev, category: cat.slug, page: 1 }))}

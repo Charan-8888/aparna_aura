@@ -18,6 +18,7 @@ const Category = () => {
   
   const { category, categories, loading: catLoading, error: catError, retry: catRetry } = useCategories(isAll ? null : slug);
   const { products, loading: prodLoading, error: prodError, retry: prodRetry } = useProducts({ category: isAll ? '' : slug });
+  const categoryList = Array.isArray(categories) ? categories : [];
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -109,7 +110,7 @@ const Category = () => {
           <Breadcrumb items={[{ label: 'Categories', path: '/categories/all' }]} />
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-            {categories?.map((cat, i) => (
+            {categoryList.map((cat, i) => (
               <motion.div
                 key={cat.id || cat.slug}
                 initial={{ opacity: 0, y: 30 }}

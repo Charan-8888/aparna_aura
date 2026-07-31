@@ -171,6 +171,7 @@ REST_FRAMEWORK = {
         'login': os.getenv('LOGIN_RATE_LIMIT', '5/minute'),
         'register': os.getenv('REGISTER_RATE_LIMIT', '5/hour'),
         'password_reset': os.getenv('PASSWORD_RESET_RATE_LIMIT', '3/hour'),
+        'password_reset_confirm': os.getenv('PASSWORD_RESET_CONFIRM_RATE_LIMIT', '5/hour'),
         'google_login': os.getenv('GOOGLE_LOGIN_RATE_LIMIT', '10/minute'),
     },
 }
@@ -208,6 +209,8 @@ SECURE_REFERRER_POLICY = 'same-origin'
 X_FRAME_OPTIONS = 'DENY'
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
 
 # Password-reset messages must be delivered by a real provider in production.
 # Console delivery is intentionally limited to local development.

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, SlidersHorizontal, ChevronDown } from 'lucide-react';
 
 const FilterSidebar = memo(({ isOpen, onClose, filters, onFilterChange, categories = [] }) => {
+  const categoryList = Array.isArray(categories) ? categories : [];
   const [expandedSections, setExpandedSections] = useState({
     categories: true,
     price: true,
@@ -65,7 +66,7 @@ const FilterSidebar = memo(({ isOpen, onClose, filters, onFilterChange, categori
                     All Categories
                   </span>
                 </label>
-                {categories?.map((cat) => (
+                {categoryList.map((cat) => (
                   <label key={cat.slug} className="flex items-center gap-3 cursor-pointer group py-1">
                     <input
                       type="radio"

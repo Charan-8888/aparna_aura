@@ -68,6 +68,7 @@ const Home = () => {
   const { products: trending, loading: trendingLoading, error: trendingError, retry: retryTrending } = useProducts({ is_trending: true });
   const { products: newArrivals, loading: newArrivalsLoading, error: newArrivalsError, retry: retryNewArrivals } = useProducts({ is_new_arrival: true });
   const { categories, loading: categoriesLoading, error: categoriesError, retry: retryCategories } = useCategories();
+  const categoryList = Array.isArray(categories) ? categories : [];
   const { recentlyViewed } = useRecentlyViewed();
 
   return (
@@ -117,9 +118,9 @@ const Home = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
             <SkeletonLoader type="card" count={6} />
           </div>
-        ) : categories && categories.length > 0 ? (
+        ) : categoryList.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
-            {categories.map((cat, i) => (
+            {categoryList.map((cat, i) => (
               <CategoryCard key={cat.id || cat.slug} category={cat} index={i} />
             ))}
           </div>
