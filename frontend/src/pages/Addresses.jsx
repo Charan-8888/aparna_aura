@@ -6,6 +6,7 @@ import Loader from '../components/Loader/Loader';
 import ErrorState from '../components/ErrorState/ErrorState';
 import EmptyState from '../components/EmptyState/EmptyState';
 import Input from '../components/Input/Input';
+import LocationPicker from '../components/LocationPicker/LocationPicker';
 import addressService from '../services/addressService';
 
 const AddressForm = ({ initialData, onSave, onCancel, loading }) => {
@@ -19,6 +20,8 @@ const AddressForm = ({ initialData, onSave, onCancel, loading }) => {
     state: '',
     pincode: '',
     country: 'India',
+    latitude: null,
+    longitude: null,
     is_default: false,
     ...initialData,
   });
@@ -34,6 +37,22 @@ const AddressForm = ({ initialData, onSave, onCancel, loading }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave(formData);
+  };
+
+  const handleLocationSelect = ({ latitude, longitude, address }) => {
+    const resolvedCity = address.city || address.town || address.village || address.municipality || address.county;
+    const resolvedStreet = address.road || address.pedestrian || address.neighbourhood || address.suburb;
+    setFormData((prev) => ({
+      ...prev,
+      latitude: Number(latitude).toFixed(6),
+      longitude: Number(longitude).toFixed(6),
+      house_no: address.house_number || prev.house_no,
+      street: resolvedStreet || prev.street,
+      city: resolvedCity || prev.city,
+      state: address.state || prev.state,
+      pincode: address.postcode || prev.pincode,
+      country: address.country || prev.country,
+    }));
   };
 
   return (
@@ -55,13 +74,14 @@ const AddressForm = ({ initialData, onSave, onCancel, loading }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
         <Input required label="Full Name" name="full_name" value={formData.full_name} onChange={handleChange} />
-        <Input required label="Phone Number" name="phone" value={formData.phone} onChange={handleChange} />
+        <Input required type="tel" autoComplete="tel" label="Recipient Phone Number" name="phone" value={formData.phone} onChange={handleChange} placeholder="Phone number for this delivery" />
         <Input required label="House No / Flat" name="house_no" value={formData.house_no} onChange={handleChange} />
         <Input required label="Street" name="street" value={formData.street} onChange={handleChange} />
         <Input label="Landmark (Optional)" name="landmark" value={formData.landmark} onChange={handleChange} />
         <Input required label="City" name="city" value={formData.city} onChange={handleChange} />
         <Input required label="State" name="state" value={formData.state} onChange={handleChange} />
         <Input required label="Pincode" name="pincode" value={formData.pincode} onChange={handleChange} />
+        <LocationPicker latitude={formData.latitude} longitude={formData.longitude} onSelect={handleLocationSelect} />
       </div>
 
       <div className="mt-6 flex items-center">
@@ -216,7 +236,7 @@ const Addresses = () => {
                 </span>
               )}
               <h4 className="text-base font-bold text-[var(--color-brand)] mb-1">{address.full_name}</h4>
-              <p className="text-sm text-[var(--color-muted)] mb-4">{address.phone}</p>
+              <p className="text-sm text-[var(--color-muted)] mb-4">Recipient: {address.phone}</p>
               
               <div className="text-sm text-[var(--color-text-main)] space-y-1 leading-relaxed">
                 <p>{address.house_no}, {address.street}</p>

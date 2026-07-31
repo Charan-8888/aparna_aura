@@ -8,3 +8,4 @@ cloudinary==1.45.0
 django-filter==26.1
 drf-spectacular==0.30.0
 razorpay==2.0.1
+google-auth==2.45.0

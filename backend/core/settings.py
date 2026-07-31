@@ -33,7 +33,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = [host.strip() for host in os.getenv("ALLOWED_HOSTS", "").split(",") if host.strip()]
 
 # Application definition
 
@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     # Third party
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'cloudinary',
     'django_filters',
@@ -118,6 +119,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {'min_length': 12},
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -159,6 +161,18 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 12,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'EXCEPTION_HANDLER': 'core.exceptions.custom_exception_handler',
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': os.getenv('API_ANON_RATE_LIMIT', '100/hour'),
+        'user': os.getenv('API_USER_RATE_LIMIT', '1000/hour'),
+        'login': os.getenv('LOGIN_RATE_LIMIT', '5/minute'),
+        'register': os.getenv('REGISTER_RATE_LIMIT', '5/hour'),
+        'password_reset': os.getenv('PASSWORD_RESET_RATE_LIMIT', '3/hour'),
+        'google_login': os.getenv('GOOGLE_LOGIN_RATE_LIMIT', '10/minute'),
+    },
 }
 
 SIMPLE_JWT = {
@@ -176,20 +190,54 @@ SIMPLE_JWT = {
 #     "https://www.aparnaaura.com",
 # ]
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
+    origin.strip()
+    for origin in os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173').split(',')
+    if origin.strip()
 ]
+
+# Browser and transport hardening. These secure-cookie and HSTS options activate
+# only in production, where HTTPS must be terminated by the deployment platform.
+SECURE_SSL_REDIRECT = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_HSTS_SECONDS = 31_536_000 if not DEBUG else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_PRELOAD = not DEBUG
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = 'same-origin'
+X_FRAME_OPTIONS = 'DENY'
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
+
+# Password-reset messages must be delivered by a real provider in production.
+# Console delivery is intentionally limited to local development.
+EMAIL_BACKEND = os.getenv(
+    'EMAIL_BACKEND',
+    'django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.smtp.EmailBackend',
+)
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'no-reply@localhost')
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:5173')
+EMAIL_HOST = os.getenv('EMAIL_HOST', '')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
 
 # Cloudinary
 import cloudinary
 cloudinary.config(
   cloud_name = os.environ.get('CLOUDINARY_CLOUD_NAME'),
   api_key = os.environ.get('CLOUDINARY_API_KEY'),
-  api_secret = os.environ.get('CLOUDINARY_API_SECRET')
+  api_secret = os.environ.get('CLOUDINARY_API_SECRET'),
+  secure = True
 )
 
 # Razorpay
 RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID')
 RAZORPAY_KEY_SECRET = os.environ.get('RAZORPAY_KEY_SECRET')
+
+# Google Identity Services
+GOOGLE_OAUTH_CLIENT_ID = os.environ.get('GOOGLE_OAUTH_CLIENT_ID')
 
 # Cash on Delivery
 COD_MAX_LIMIT = 50000.00  # Maximum order amount eligible for COD (in ₹)

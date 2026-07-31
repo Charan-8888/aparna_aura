@@ -172,7 +172,7 @@ const OrderDetail = () => {
                   </Link>
                   <div className="flex-1 flex flex-col justify-between">
                     <div>
-                      <p className="text-xs text-[#D4AF37] font-bold uppercase tracking-wider mb-1">{item.product?.category}</p>
+                      <p className="text-xs text-[#D4AF37] font-bold uppercase tracking-wider mb-1">{typeof item.product?.category === 'object' ? (item.product?.category?.name || 'Jewellery') : (item.product?.category || 'Jewellery')}</p>
                       <Link to={`/product/${item.product?.slug}`} className="text-sm sm:text-base font-bold text-[#382135] hover:text-[#D4AF37] transition-colors line-clamp-2">
                         {item.product?.name}
                       </Link>

@@ -14,6 +14,6 @@ class ProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Address)
 class AddressAdmin(admin.ModelAdmin):
-    list_display = ('user', 'full_name', 'city', 'state', 'pincode', 'is_default')
+    list_display = ('user', 'full_name', 'phone', 'city', 'state', 'pincode', 'is_default')
     search_fields = ('user__email', 'full_name', 'city', 'pincode')
     list_filter = ('is_default', 'state')

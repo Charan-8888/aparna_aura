@@ -132,8 +132,12 @@ const HeroSlider = memo(() => {
               alt={slide.title}
               className="w-full h-full object-cover"
               loading="eager"
-              fetchpriority="high"
+              fetchPriority="high"
               decoding="async"
+              onError={(event) => {
+                event.currentTarget.onerror = null;
+                event.currentTarget.src = '/image-fallback.svg';
+              }}
               initial={{ scale: 1 }}
               animate={{ scale: 1.08 }}
               transition={{ duration: SLIDE_DURATION / 1000, ease: 'linear' }}

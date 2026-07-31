@@ -12,6 +12,11 @@ const authService = {
     return response.data;
   },
 
+  loginWithGoogle: async (credential) => {
+    const response = await apiClient.post(`${AUTH_BASE}/google/`, { credential });
+    return response.data;
+  },
+
   /**
    * Register a new account.
    * Returns { access, refresh, user } (auto-login on registration)
@@ -76,9 +81,10 @@ const authService = {
   /**
    * Reset the password using a token from email.
    */
-  resetPassword: async ({ token, new_password }) => {
+  resetPassword: async ({ email, otp, new_password }) => {
     const response = await apiClient.post(`${AUTH_BASE}/password/reset/`, {
-      token,
+      email,
+      otp,
       new_password,
     });
     return response.data;

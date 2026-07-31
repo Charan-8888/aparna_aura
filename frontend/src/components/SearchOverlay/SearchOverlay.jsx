@@ -21,7 +21,7 @@ const getRecentSearches = () => {
 };
 
 const saveRecentSearch = (term) => {
-  const recent = getRecentSearches().filter((s) => s.toLowerCase() !== term.toLowerCase());
+  const recent = getRecentSearches().filter((s) => (s || '').toLowerCase() !== (term || '').toLowerCase());
   recent.unshift(term);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(recent.slice(0, 5)));
 };

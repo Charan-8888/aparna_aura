@@ -135,8 +135,16 @@ const ProductDetail = () => {
     );
   }
 
-  const images = product.images || [];
-  if (images.length === 0 && product.image) images.push(product.image);
+  // Backend serializer now returns an array of objects for images. 
+  // We need to unwrap them into strings for ImageGallery and SEO components.
+  const images = (product.images || [])
+    .map(img => typeof img === 'object' && img !== null ? img.image : img)
+    .filter(Boolean);
+    
+  if (images.length === 0 && product.image) {
+    const fallback = typeof product.image === 'object' && product.image !== null ? product.image.image : product.image;
+    if (fallback) images.push(fallback);
+  }
 
   const materialName = product.material || 'Premium Quality Gold';
   const categoryName = typeof product.category === 'object' ? product.category?.name : (product.category || 'Jewellery');
@@ -316,7 +324,7 @@ const ProductDetail = () => {
                           </div>
                           <div>
                             <h4 className="text-sm font-bold text-[#382135] mb-1">Design Inspiration</h4>
-                            <p className="text-sm">This {categoryName.toLowerCase()} draws inspiration from classical Indian motifs, reimagined with contemporary elegance for the modern connoisseur.</p>
+                            <p className="text-sm">This {(categoryName || 'jewellery').toLowerCase()} draws inspiration from classical Indian motifs, reimagined with contemporary elegance for the modern connoisseur.</p>
                           </div>
                         </div>
                         <div className="flex items-start gap-3">

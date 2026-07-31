@@ -13,6 +13,8 @@ const Wishlist = lazy(() => import('../pages/Wishlist'));
 const Checkout = lazy(() => import('../pages/Checkout'));
 const Login = lazy(() => import('../pages/Login'));
 const Register = lazy(() => import('../pages/Register'));
+const ForgotPassword = lazy(() => import('../pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('../pages/ResetPassword'));
 const Profile = lazy(() => import('../pages/Profile'));
 const Orders = lazy(() => import('../pages/Orders'));
 const OrderDetail = lazy(() => import('../pages/OrderDetail'));
@@ -120,6 +122,14 @@ export const router = createBrowserRouter([
       {
         path: 'register',
         element: <Register />,
+      },
+      {
+        path: 'forgot-password',
+        element: <ForgotPassword />,
+      },
+      {
+        path: 'reset-password',
+        element: <ResetPassword />,
       },
       {
         path: 'try-on',

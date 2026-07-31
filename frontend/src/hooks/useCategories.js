@@ -19,11 +19,8 @@ export const useCategories = (slug = null) => {
       if (catSlug) {
         response = await categoryService.getCategory(catSlug);
       } else {
+        // categoryService.getCategories() already returns a normalized array
         response = await categoryService.getCategories();
-        // If the backend paginates categories, extract results, otherwise use the array
-        if (response && Array.isArray(response.results)) {
-            response = response.results;
-        }
       }
       setData(response);
     } catch (err) {

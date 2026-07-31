@@ -40,6 +40,10 @@ const Payment = () => {
     try {
       // 1. Create order on backend
       const { data: rpData } = await paymentService.createRazorpayOrder(orderId);
+
+      if (!rpData?.key_id || !rpData?.razorpay_order_id) {
+        throw new Error('The payment gateway returned incomplete checkout details.');
+      }
       
       // 2. Load Razorpay script if not present
       if (!window.Razorpay) {
@@ -54,7 +58,7 @@ const Payment = () => {
 
       // 3. Initialize Razorpay
       const options = {
-        key: rpData.key,
+        key: rpData.key_id,
         amount: rpData.amount,
         currency: rpData.currency,
         name: 'Aparna Aura',

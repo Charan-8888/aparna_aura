@@ -1,6 +1,7 @@
 import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -24,6 +25,7 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     role = models.CharField(max_length=20, default='customer')
+    google_subject = models.CharField(max_length=255, unique=True, blank=True, null=True)
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
@@ -41,6 +43,18 @@ class Profile(models.Model):
     def __str__(self):
         return f"{self.user.email} Profile"
 
+
+class PasswordResetOTP(models.Model):
+    """Hashed, short-lived OTP used only for password recovery."""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='password_reset_otp')
+    code_hash = models.CharField(max_length=128)
+    expires_at = models.DateTimeField()
+    failed_attempts = models.PositiveSmallIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Password reset OTP for {self.user.email}"
+
 class Address(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
@@ -53,6 +67,8 @@ class Address(models.Model):
     state = models.CharField(max_length=100)
     pincode = models.CharField(max_length=20)
     country = models.CharField(max_length=100)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True, validators=[MinValueValidator(-90), MaxValueValidator(90)])
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True, validators=[MinValueValidator(-180), MaxValueValidator(180)])
     is_default = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ImageIcon } from 'lucide-react';
 
@@ -13,6 +13,13 @@ const OptimizedImage = ({
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [activeSrc, setActiveSrc] = useState(src);
+
+  useEffect(() => {
+    setActiveSrc(src);
+    setIsLoaded(false);
+    setHasError(false);
+  }, [src]);
 
   return (
     <div className={`relative overflow-hidden bg-[#F3EFE8] ${containerClassName}`}>
@@ -31,17 +38,21 @@ const OptimizedImage = ({
 
       {/* Actual Image */}
       <motion.img
-        src={src}
+        src={activeSrc}
         alt={alt}
         loading={loading}
-        fetchpriority={fetchPriority}
+        fetchPriority={fetchPriority}
         decoding="async"
         className={`w-full h-full object-cover transition-opacity duration-700 ${className} ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
         style={style}
         onLoad={() => setIsLoaded(true)}
         onError={() => {
-          setIsLoaded(true);
-          setHasError(true);
+          if (activeSrc !== '/image-fallback.svg') {
+            setActiveSrc('/image-fallback.svg');
+          } else {
+            setIsLoaded(true);
+            setHasError(true);
+          }
         }}
       />
     </div>

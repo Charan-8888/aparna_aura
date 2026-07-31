@@ -5,9 +5,10 @@ import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Sparkles } from 'lucide-reac
 import { useAuth } from '../hooks/useAuth';
 import { APP_NAME } from '../constants/app';
 import Input from '../components/Input/Input';
+import GoogleSignInButton from '../components/GoogleSignInButton/GoogleSignInButton';
 
 const Register = () => {
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -34,8 +35,8 @@ const Register = () => {
     }
     if (!formData.password) {
       newErrors.password = 'Password is required.';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters.';
+    } else if (formData.password.length < 12) {
+      newErrors.password = 'Password must be at least 12 characters.';
     }
     if (!formData.confirm_password) {
       newErrors.confirm_password = 'Please confirm your password.';
@@ -75,20 +76,46 @@ const Register = () => {
     } catch (err) {
       const data = err.response?.data;
       if (data) {
-        if (data.detail) {
-          setServerError(data.detail);
-        } else if (data.non_field_errors) {
-          setServerError(data.non_field_errors[0]);
-        } else {
-          const fieldErrors = {};
-          Object.entries(data).forEach(([key, val]) => {
-            fieldErrors[key] = Array.isArray(val) ? val[0] : val;
-          });
-          setErrors(fieldErrors);
+        // Backend wraps errors as { success: false, error: "..." or { field: [...] } }
+        const errorPayload = data.error ?? data;
+
+        if (typeof errorPayload === 'string') {
+          setServerError(errorPayload);
+        } else if (Array.isArray(errorPayload)) {
+          setServerError(errorPayload.join(' '));
+        } else if (typeof errorPayload === 'object' && errorPayload !== null) {
+          // Could have non_field_errors or field-level keys
+          const { non_field_errors, detail, ...fieldErrors } = errorPayload;
+          if (detail) {
+            setServerError(Array.isArray(detail) ? detail.join(' ') : detail);
+          } else if (non_field_errors) {
+            setServerError(Array.isArray(non_field_errors) ? non_field_errors[0] : non_field_errors);
+          } else if (Object.keys(fieldErrors).length > 0) {
+            const mapped = {};
+            Object.entries(fieldErrors).forEach(([key, val]) => {
+              mapped[key] = Array.isArray(val) ? val[0] : String(val);
+            });
+            setErrors(mapped);
+          } else {
+            setServerError('Registration failed. Please try again.');
+          }
         }
       } else {
         setServerError('Unable to connect. Please check your internet and try again.');
       }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleSignIn = async (credential) => {
+    setIsSubmitting(true);
+    setServerError('');
+    try {
+      await loginWithGoogle(credential);
+      navigate('/', { replace: true });
+    } catch (err) {
+      setServerError(err.response?.data?.google?.[0] || 'Google sign-up failed. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -254,6 +281,17 @@ const Register = () => {
                 )}
               </button>
             </form>
+
+            <div className="flex items-center gap-3 my-6 text-xs text-[var(--color-muted)]">
+              <span className="h-px flex-1 bg-[#E6E1D8]" />
+              <span>OR</span>
+              <span className="h-px flex-1 bg-[#E6E1D8]" />
+            </div>
+            <GoogleSignInButton
+              onCredential={handleGoogleSignIn}
+              onError={setServerError}
+              text="signup_with"
+            />
           </div>
 
           <p className="text-center text-sm text-[var(--color-muted)] mt-6">

@@ -5,6 +5,7 @@ The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/6.0/topics/http/urls/
 """
 from django.contrib import admin
+from django.conf import settings
 from django.urls import path, include
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -14,10 +15,6 @@ from drf_spectacular.views import (
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # API schema & documentation
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-
     # App endpoints
     path('api/v1/auth/', include('apps.users.urls')),
     path('api/v1/products/', include('apps.products.urls')),
@@ -26,3 +23,11 @@ urlpatterns = [
     path('api/v1/orders/', include('apps.orders.urls')),
     path('api/v1/payments/', include('apps.payments.urls')),
 ]
+
+# Interactive API documentation is a development tool. Do not expose endpoint
+# metadata publicly on the production site.
+if settings.DEBUG:
+    urlpatterns += [
+        path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+        path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    ]

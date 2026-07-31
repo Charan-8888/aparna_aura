@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trash2, ArrowRight, Minus, Plus, Sparkles, ShieldCheck } from 'lucide-react';
+import { Trash2, ArrowRight, Minus, Plus, ShoppingCart, ShoppingBag, Sparkles, ShieldCheck } from 'lucide-react';
 import Breadcrumb from '../components/Breadcrumb/Breadcrumb';
 import Loader from '../components/Loader/Loader';
 import ErrorState from '../components/ErrorState/ErrorState';
@@ -28,46 +28,27 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -32 }}
       transition={{ duration: 0.3 }}
-<<<<<<< Updated upstream
-      className="flex gap-6 py-6 border-b border-gray-100 last:border-0"
-=======
       className="flex gap-5 py-6 border-b border-[var(--color-border)] last:border-0"
->>>>>>> Stashed changes
     >
       {/* Product Image */}
       <Link to={`/product/${product.slug}`} className="flex-shrink-0">
         <img
           src={image}
           alt={name}
-<<<<<<< Updated upstream
-          className="w-28 h-32 object-cover rounded-xl bg-gray-50 hover:opacity-90 transition-opacity border border-gray-100"
-=======
           className="w-24 h-28 object-cover rounded-[12px] bg-[var(--color-secondary-bg)] hover:opacity-90 transition-opacity"
->>>>>>> Stashed changes
         />
       </Link>
 
       {/* Details */}
       <div className="flex-1 min-w-0 flex flex-col justify-between">
-<<<<<<< Updated upstream
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs text-[#D4AF37] uppercase tracking-widest font-medium mb-1">
-=======
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-[10px] text-[var(--color-muted)] font-bold uppercase tracking-widest mb-1.5">
->>>>>>> Stashed changes
-              {product.category || 'Jewellery'}
+              {typeof product.category === 'object' ? (product.category?.name || 'Jewellery') : (product.category || 'Jewellery')}
             </p>
             <Link
               to={`/product/${product.slug}`}
-<<<<<<< Updated upstream
-              className="text-lg font-bold text-[#382135] hover:text-[#D4AF37] transition-colors line-clamp-2"
-              style={{ fontFamily: '"Playfair Display", serif' }}
-=======
               className="text-base font-medium text-[var(--color-brand)] hover:text-[var(--color-accent)] transition-colors line-clamp-2 leading-snug"
->>>>>>> Stashed changes
             >
               {name}
             </Link>
@@ -75,26 +56,6 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
           {/* Remove */}
           <button
             onClick={() => onRemove(item.id)}
-<<<<<<< Updated upstream
-            className="flex-shrink-0 text-gray-400 hover:text-red-500 transition-colors uppercase text-xs tracking-wider font-semibold"
-            title="Remove item"
-          >
-            Remove
-          </button>
-        </div>
-
-        <div className="flex items-center justify-between mt-4">
-          {/* Minimalist Quantity Selector */}
-          <div className="inline-flex items-center border border-gray-200 rounded-full overflow-hidden">
-            <button
-              onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
-              disabled={item.quantity <= 1}
-              className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-            >
-              <Minus size={14} />
-            </button>
-            <span className="w-10 h-10 flex items-center justify-center text-sm font-semibold text-[#382135]">
-=======
             className="flex-shrink-0 p-2 text-[#8A8A8A] hover:text-red-500 transition-colors rounded-[8px] hover:bg-red-50"
             title="Remove item"
           >
@@ -113,28 +74,19 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
               <Minus size={14} />
             </button>
             <span className="w-10 h-9 flex items-center justify-center text-sm font-semibold text-[var(--color-brand)] border-x border-[var(--color-border)] bg-[var(--color-background)]">
->>>>>>> Stashed changes
               {item.quantity}
             </span>
             <button
               onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
               disabled={item.quantity >= (product.stock || 99)}
-<<<<<<< Updated upstream
-              className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
-=======
               className="w-9 h-9 flex items-center justify-center text-[var(--color-text-main)] hover:bg-[var(--color-secondary-bg)] disabled:opacity-40 disabled:hover:bg-white transition-colors"
->>>>>>> Stashed changes
             >
               <Plus size={14} />
             </button>
           </div>
 
           {/* Line Total */}
-<<<<<<< Updated upstream
-          <p className="text-xl font-bold text-[#382135]" style={{ fontFamily: '"Playfair Display", serif' }}>
-=======
           <p className="text-lg font-bold text-[var(--color-brand)]">
->>>>>>> Stashed changes
             {formatPrice(price * item.quantity)}
           </p>
         </div>
@@ -165,52 +117,6 @@ const Cart = () => {
   }
 
   return (
-<<<<<<< Updated upstream
-    <div className="bg-white min-h-[85vh] pb-24">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-        <Breadcrumb items={[{ label: 'Shopping Bag', path: '/cart' }]} />
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mt-6 mb-12 text-center"
-        >
-          <h1 className="text-4xl md:text-5xl font-bold text-[#382135]" style={{ fontFamily: '"Playfair Display", serif' }}>
-            Shopping Bag
-          </h1>
-          {itemCount > 0 && (
-            <p className="text-gray-500 mt-3 text-sm tracking-wide uppercase">
-              {itemCount} {itemCount === 1 ? 'Piece' : 'Pieces'} reserved for you
-            </p>
-          )}
-        </motion.div>
-
-        {items.length === 0 ? (
-          <EmptyState
-            icon={null} // We will use custom luxury styling below instead of default icon
-            title="Your Shopping Bag Is Empty"
-            description="Discover timeless pieces crafted to celebrate life's most meaningful moments."
-            action={
-              <Link
-                to="/products"
-                className="inline-flex items-center gap-2 bg-[#382135] text-white px-10 py-4 rounded-full font-semibold hover:bg-[#2a1827] transition-all shadow-lg shadow-[#382135]/20 mt-4 uppercase tracking-wider text-sm"
-              >
-                Explore Collections
-              </Link>
-            }
-          />
-        ) : (
-          <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
-            {/* Items List */}
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-200">
-                <h2 className="text-sm font-bold text-[#382135] uppercase tracking-wider">Reserved Items</h2>
-                <button
-                  onClick={clearCart}
-                  className="text-xs font-semibold text-gray-400 hover:text-red-500 transition-colors flex items-center gap-1 uppercase tracking-wider"
-                >
-                  Clear All
-=======
     <div className="container-default section-padding pb-20">
       <Breadcrumb items={[{ label: 'Shopping Cart', path: '/cart' }]} />
 
@@ -253,7 +159,6 @@ const Cart = () => {
                   className="text-xs font-semibold text-[var(--color-muted)] hover:text-red-500 transition-colors flex items-center gap-1.5"
                 >
                   <Trash2 size={14} /> Clear All
->>>>>>> Stashed changes
                 </button>
               </div>
 
@@ -269,66 +174,6 @@ const Cart = () => {
               </AnimatePresence>
             </div>
 
-<<<<<<< Updated upstream
-            {/* Order Summary */}
-            <div className="lg:w-[420px] flex-shrink-0">
-              <motion.div
-                initial={{ opacity: 0, x: 16 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 }}
-                className="bg-[#FAF8F5] p-8 lg:p-10 sticky top-28 border border-[#E6E1D8]"
-              >
-                <h2 className="text-2xl font-bold text-[#382135] mb-8" style={{ fontFamily: '"Playfair Display", serif' }}>
-                  Order Summary
-                </h2>
-
-                <div className="space-y-4 mb-8 text-[#382135]">
-                  <div className="flex justify-between text-sm">
-                    <span>Subtotal</span>
-                    <span className="font-semibold">{formatPrice(subtotal)}</span>
-                  </div>
-                  {shipping > 0 ? (
-                    <div className="flex justify-between text-sm">
-                      <span>Insured Shipping</span>
-                      <span className="font-semibold">{formatPrice(shipping)}</span>
-                    </div>
-                  ) : (
-                    <div className="flex justify-between text-sm">
-                      <span>Insured Shipping</span>
-                      <span className="font-semibold text-green-600">Complimentary</span>
-                    </div>
-                  )}
-                  {tax > 0 && (
-                    <div className="flex justify-between text-sm">
-                      <span>Taxes (GST)</span>
-                      <span className="font-semibold">{formatPrice(tax)}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="border-t border-[#E6E1D8] pt-6 mb-8">
-                  <div className="flex justify-between items-end">
-                    <span className="text-sm font-bold text-[#382135] uppercase tracking-wider">Total</span>
-                    <span className="text-3xl font-bold text-[#382135]" style={{ fontFamily: '"Playfair Display", serif' }}>
-                      {formatPrice(grandTotal)}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2 text-right">Inclusive of all duties and taxes</p>
-                </div>
-
-                {/* Checkout CTA */}
-                <button
-                  onClick={() => navigate('/checkout')}
-                  className="w-full flex items-center justify-center gap-2 bg-[#382135] text-white font-semibold py-4 rounded-full hover:bg-[#2a1827] transition-all duration-300 shadow-lg shadow-[#382135]/20 uppercase tracking-widest text-xs"
-                >
-                  Secure Checkout <ArrowRight size={16} />
-                </button>
-
-                {/* Trust Badges */}
-                <LuxuryGuarantees className="mt-8 pt-6 border-[#E6E1D8]" />
-              </motion.div>
-            </div>
-=======
             {/* Continue Shopping */}
             <Link
               to="/products"
@@ -394,10 +239,9 @@ const Cart = () => {
                 Secure checkout by Aparna Aura
               </div>
             </motion.div>
->>>>>>> Stashed changes
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

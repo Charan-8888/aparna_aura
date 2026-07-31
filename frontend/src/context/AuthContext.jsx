@@ -52,6 +52,12 @@ export const AuthProvider = ({ children }) => {
     return user;
   }, []);
 
+  const loginWithGoogle = useCallback(async (credential) => {
+    const data = await authService.loginWithGoogle(credential);
+    saveTokens(data.access, data.refresh);
+    setCurrentUser(data.user || (await authService.getMe()));
+  }, []);
+
   // ─── Register ─────────────────────────────────────────────────────────────────
   const register = useCallback(async (formData) => {
     const data = await authService.register(formData);
@@ -85,6 +91,7 @@ export const AuthProvider = ({ children }) => {
     currentUser,
     loading,
     login,
+    loginWithGoogle,
     logout,
     register,
     updateUser,

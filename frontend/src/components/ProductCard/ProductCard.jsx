@@ -6,6 +6,18 @@ import { useWishlist } from '../../hooks/useWishlist';
 import { useCart } from '../../hooks/useCart';
 import OptimizedImage from '../OptimizedImage/OptimizedImage';
 
+const FALLBACK_IMAGE = '/image-fallback.svg';
+
+const getProductImage = (product) => {
+  const images = Array.isArray(product.images) ? product.images : [];
+  const featuredImage = images.find((item) => typeof item === 'object' && item.is_featured && item.image)?.image;
+  const firstImage = images
+    .map((item) => (typeof item === 'object' ? item.image : item))
+    .find(Boolean);
+
+  return featuredImage || firstImage || product.image || FALLBACK_IMAGE;
+};
+
 const formatPrice = (price) => `₹${Number(price || 0).toLocaleString('en-IN')}`;
 
 const ProductCard = memo(({ product, index = 0 }) => {
@@ -91,11 +103,7 @@ const ProductCard = memo(({ product, index = 0 }) => {
           {/* Main Image via OptimizedImage */}
           {isVisible && (
             <OptimizedImage
-              src={
-                typeof product.images?.[0] === 'object'
-                  ? product.images?.[0]?.image
-                  : product.images?.[0] || product.image || 'https://images.unsplash.com/photo-1515562141589-67f0d6ce4819?w=800&h=800&fit=crop'
-              }
+              src={getProductImage(product)}
               alt={product.name}
               loading="lazy"
               fetchPriority="auto"

@@ -5,9 +5,10 @@ import { Eye, EyeOff, Mail, Lock, ArrowRight, Gem } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { APP_NAME } from '../constants/app';
 import Input from '../components/Input/Input';
+import GoogleSignInButton from '../components/GoogleSignInButton/GoogleSignInButton';
 
 const Login = () => {
-  const { login } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -57,20 +58,37 @@ const Login = () => {
     } catch (err) {
       const data = err.response?.data;
       if (data) {
-        if (data.detail) {
-          setServerError(data.detail);
-        } else if (data.non_field_errors) {
-          setServerError(data.non_field_errors[0]);
-        } else {
+        // Backend uses a custom envelope: { success, message, errors }
+        if (data.message) {
+          setServerError(data.message);
+        } else if (data.errors && Object.keys(data.errors).length > 0) {
           const fieldErrors = {};
-          Object.entries(data).forEach(([key, val]) => {
-            fieldErrors[key] = Array.isArray(val) ? val[0] : val;
+          Object.entries(data.errors).forEach(([key, val]) => {
+            fieldErrors[key] = Array.isArray(val) ? val[0] : String(val);
           });
           setErrors(fieldErrors);
+        } else if (data.detail) {
+          // Fallback for any un-wrapped DRF responses
+          setServerError(data.detail);
+        } else {
+          setServerError('Login failed. Please check your credentials and try again.');
         }
       } else {
         setServerError('Unable to connect. Please check your internet and try again.');
       }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleGoogleSignIn = async (credential) => {
+    setIsSubmitting(true);
+    setServerError('');
+    try {
+      await loginWithGoogle(credential);
+      navigate(from, { replace: true });
+    } catch (err) {
+      setServerError(err.response?.data?.google?.[0] || 'Google sign-in failed. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -200,6 +218,17 @@ const Login = () => {
                 )}
               </button>
             </form>
+
+            <div className="flex items-center gap-3 my-6 text-xs text-[var(--color-muted)]">
+              <span className="h-px flex-1 bg-[#E6E1D8]" />
+              <span>OR</span>
+              <span className="h-px flex-1 bg-[#E6E1D8]" />
+            </div>
+            <GoogleSignInButton
+              onCredential={handleGoogleSignIn}
+              onError={setServerError}
+              text="signin_with"
+            />
           </div>
 
           {/* Footer Link */}

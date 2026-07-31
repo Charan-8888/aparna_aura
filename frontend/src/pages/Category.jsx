@@ -117,7 +117,7 @@ const Category = () => {
                 transition={{ delay: i * 0.1 }}
               >
                 <Link to={`/categories/${cat.slug}`} className="group block relative rounded-2xl overflow-hidden aspect-[4/3]">
-                  <img src={cat.image || 'https://images.unsplash.com/photo-1515562141589-67f0d6ce4819?w=800&h=800&fit=crop'} alt={cat.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  <img src={(cat.image && String(cat.image).startsWith('http')) ? cat.image : 'https://images.unsplash.com/photo-1515562141589-67f0d6ce4819?w=800&h=800&fit=crop'} alt={cat.name || 'Category'} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                   <div className="absolute bottom-0 left-0 p-8">
                     <h2 className="text-3xl font-bold text-white font-heading mb-2">{cat.name}</h2>
@@ -133,7 +133,9 @@ const Category = () => {
   }
 
   // Single Category View
-  const safeImage = category.image || 'https://images.unsplash.com/photo-1515562141589-67f0d6ce4819?w=1600&h=600&fit=crop';
+  const safeImage = (category.image && String(category.image).startsWith('http'))
+    ? category.image
+    : 'https://images.unsplash.com/photo-1515562141589-67f0d6ce4819?w=1600&h=600&fit=crop';
   
   const categoryBreadcrumbsSchema = {
     "@context": "https://schema.org",
@@ -220,7 +222,7 @@ const Category = () => {
             <EmptyState
               icon={Package}
               title="No Products Yet"
-              description={`We are currently curating beautiful ${category.name.toLowerCase()} for you.`}
+              description={`We are currently curating beautiful ${(category?.name || 'jewellery').toLowerCase()} for you.`}
               action={
                 <Link to="/products">
                   <button className="bg-[#382135] text-white px-6 py-2.5 rounded-lg font-medium hover:bg-[#2a1827] transition-colors mt-4">
