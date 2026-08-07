@@ -88,9 +88,14 @@ const GoogleSignInButton = ({ onCredential, onError, text = 'continue_with' }) =
 
   if (!clientId) {
     return (
-      <p className="text-center text-xs text-[var(--color-muted)]">
-        Google sign-in has not been configured yet.
-      </p>
+      <button
+        type="button"
+        onClick={() => alert("Google Sign-In requires a Client ID to be configured in .env")}
+        className="flex w-full items-center justify-center gap-3 rounded-[4px] border border-[#747775] bg-white px-3 py-2.5 text-sm font-medium text-[#1f1f1f] transition-colors hover:bg-[#f8f8f8]"
+      >
+        <span className="text-lg font-bold text-[#4285F4]" aria-hidden="true">G</span>
+        {text === 'signup_with' ? 'Sign up with Google' : 'Continue with Google'}
+      </button>
     );
   }
 

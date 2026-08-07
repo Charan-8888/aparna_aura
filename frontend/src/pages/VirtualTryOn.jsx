@@ -98,7 +98,7 @@ const VirtualTryOn = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-12 mt-4"
+        className="aura-route-hero aura-route-hero--center text-center mb-12 mt-4"
       >
         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#D4AF37]/10 text-[#D4AF37] rounded-full text-xs font-bold uppercase tracking-wider mb-4">
           <Sparkles size={14} /> Beta Feature

@@ -10,7 +10,7 @@ const NotFound = () => {
       {/* Background decoration */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#F3EFE8] rounded-full blur-[100px] opacity-60 pointer-events-none" />
       
-      <div className="max-w-2xl mx-auto px-4 text-center relative z-10">
+      <div className="aura-route-hero aura-route-hero--center max-w-2xl mx-auto px-8 py-14 text-center relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

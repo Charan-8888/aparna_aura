@@ -15,19 +15,19 @@ const Breadcrumb = memo(({ items = [] }) => {
   })();
 
   return (
-    <nav className="flex items-center text-sm text-gray-500 flex-wrap gap-1 py-4">
+    <nav aria-label="breadcrumb" className="flex items-center text-sm text-[#776b70] flex-wrap gap-1 py-4">
       <Link
         to="/"
-        className="flex items-center hover:text-[#D4AF37] transition-colors duration-200"
+        className="flex items-center hover:text-[#9b702b] transition-colors duration-200"
       >
         <Home size={14} className="mr-1" />
         Home
       </Link>
       {crumbs.map((crumb, i) => (
         <React.Fragment key={i}>
-          <ChevronRight size={14} className="text-gray-300 mx-1" />
+          <ChevronRight size={14} className="text-[#cbbfac] mx-1" />
           {i === crumbs.length - 1 ? (
-            <span className="text-[#382135] font-medium">{crumb.label}</span>
+            <span className="text-[#301b2f] font-semibold">{crumb.label}</span>
           ) : (
             <Link
               to={crumb.path}

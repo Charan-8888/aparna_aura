@@ -87,7 +87,7 @@ const OrderDetail = () => {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-24">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="aura-route-hero aura-route-hero--compact flex items-center justify-between mb-8">
         <Link to="/orders" className="flex items-center gap-2 text-sm font-semibold text-gray-500 hover:text-[#382135] transition-colors">
           <ArrowLeft size={16} /> Back to Orders
         </Link>

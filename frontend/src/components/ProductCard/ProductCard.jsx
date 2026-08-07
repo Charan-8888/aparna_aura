@@ -93,13 +93,13 @@ const ProductCard = memo(({ product, index = 0 }) => {
       initial={{ opacity: 0, y: 30 }}
       animate={isVisible ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5, delay: index * 0.08 }}
-      className="group relative bg-transparent border-0 transition-all duration-500 overflow-hidden flex flex-col"
+      className="group relative flex flex-col overflow-hidden rounded-[1.45rem] border border-[#3b2338]/8 bg-[#fffdf9] p-2 shadow-[0_18px_55px_rgba(48,27,47,.055)] transition-all duration-500 hover:-translate-y-1 hover:border-[#b88735]/20 hover:shadow-[0_26px_70px_rgba(48,27,47,.1)]"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <Link to={`/product/${product.slug}`} className="flex flex-col h-full">
         {/* Image Container (Aspect Ratio enforced for CLS) */}
-        <div className="relative aspect-[4/5] overflow-hidden bg-[#f2eee8]">
+        <div className="relative aspect-[4/5] overflow-hidden rounded-[1.05rem] bg-[#eee6dc]">
           {/* Main Image via OptimizedImage */}
           {isVisible && (
             <OptimizedImage
@@ -107,7 +107,7 @@ const ProductCard = memo(({ product, index = 0 }) => {
               alt={product.name}
               loading="lazy"
               fetchPriority="auto"
-              className={`${isHovered && product.video ? 'opacity-0' : 'group-hover:scale-110'}`}
+              className={`${isHovered && product.video ? 'opacity-0' : 'group-hover:scale-[1.055]'} transition-transform duration-[900ms] ease-out`}
               containerClassName="absolute inset-0 w-full h-full"
             />
           )}
@@ -188,11 +188,11 @@ const ProductCard = memo(({ product, index = 0 }) => {
         </div>
 
         {/* Product Info */}
-        <div className="px-1 pt-4 pb-3 flex flex-col flex-1 bg-transparent">
-          <p className="text-[9px] text-[#9b8f85] font-bold uppercase tracking-[0.18em] mb-2">
+        <div className="flex flex-1 flex-col bg-transparent px-2 pb-3 pt-4">
+          <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.19em] text-[#9b702b]">
             {typeof product.category === 'object' ? product.category?.name : (product.category || 'Jewellery')}
           </p>
-          <h3 className="font-heading text-xl font-medium text-[var(--color-brand)] line-clamp-1 group-hover:text-[var(--color-accent)] transition-colors duration-300 mb-3">
+          <h3 className="mb-3 line-clamp-1 font-heading text-xl font-medium text-[#301b2f] transition-colors duration-300 group-hover:text-[#a77d32]">
             {product.name}
           </h3>
           

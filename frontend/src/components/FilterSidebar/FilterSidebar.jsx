@@ -209,7 +209,7 @@ const FilterSidebar = memo(({ isOpen, onClose, filters, onFilterChange, categori
       {/* Clear Filters */}
       <button
         onClick={() => onFilterChange?.({ category: '', priceRange: null, maxPrice: 100000, sort: 'featured' })}
-        className="w-full py-2.5 text-sm font-medium text-gray-500 hover:text-[#382135] border border-gray-200 rounded-lg hover:border-[#382135] transition-all duration-200"
+        className="w-full py-3 text-xs font-bold uppercase tracking-[0.14em] text-[#6f6269] hover:text-[#301b2f] border border-[#ded1bd] rounded-full hover:border-[#c9a24b] hover:bg-[#fbf6ed] transition-all duration-200"
       >
         Clear All Filters
       </button>
@@ -220,10 +220,10 @@ const FilterSidebar = memo(({ isOpen, onClose, filters, onFilterChange, categori
     <>
       {/* Desktop Sidebar */}
       <aside className="hidden lg:block w-64 flex-shrink-0">
-        <div className="sticky top-28">
-          <div className="flex items-center gap-2 mb-6">
+        <div className="sticky top-28 rounded-[22px] border border-[#d9c9ae]/60 bg-white/80 p-6 shadow-[0_18px_50px_rgba(48,27,47,0.08)] backdrop-blur-xl">
+          <div className="flex items-center gap-3 mb-6 pb-5 border-b border-[#e9dfcf]">
             <SlidersHorizontal size={18} className="text-[#382135]" />
-            <h3 className="text-lg font-bold text-[#382135]">Filters</h3>
+            <h3 className="text-lg font-semibold text-[#301b2f] font-heading">Filters</h3>
           </div>
           <FilterContent />
         </div>
@@ -245,7 +245,7 @@ const FilterSidebar = memo(({ isOpen, onClose, filters, onFilterChange, categori
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
-              className="fixed top-0 left-0 bottom-0 w-80 bg-white z-50 shadow-xl p-6 overflow-y-auto lg:hidden"
+              className="fixed top-0 left-0 bottom-0 w-80 bg-[#fbf8f2] z-50 shadow-2xl p-6 overflow-y-auto lg:hidden border-r border-[#d8c7aa]"
             >
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-2">

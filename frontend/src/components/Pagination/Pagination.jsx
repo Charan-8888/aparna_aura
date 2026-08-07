@@ -26,7 +26,7 @@ const Pagination = memo(({ currentPage = 1, totalPages = 1, onPageChange }) => {
   };
 
   return (
-    <nav className="flex items-center justify-center gap-2 mt-14">
+    <nav aria-label="Pagination" className="flex items-center justify-center gap-2 mt-14 rounded-full bg-white/75 border border-[#e3d8c5] w-fit mx-auto p-2 shadow-[0_12px_35px_rgba(48,27,47,0.07)] backdrop-blur">
       <button
         onClick={() => onPageChange?.(currentPage - 1)}
         disabled={currentPage === 1}
@@ -46,7 +46,7 @@ const Pagination = memo(({ currentPage = 1, totalPages = 1, onPageChange }) => {
             onClick={() => onPageChange?.(page)}
             className={`min-w-[40px] h-10 rounded-full font-medium text-sm transition-all duration-200 ${
               page === currentPage
-                ? 'bg-[#301b2f] text-white shadow-none'
+                ? 'bg-gradient-to-br from-[#241421] to-[#5a304f] text-white shadow-[0_8px_18px_rgba(48,27,47,0.2)]'
                 : 'border border-[#E7DFD3] text-gray-600 hover:bg-[#301b2f] hover:text-white hover:border-[#301b2f]'
             }`}
           >

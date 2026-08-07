@@ -95,7 +95,7 @@ const Checkout = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         <Breadcrumb items={[{ label: 'Bag', path: '/cart' }, { label: 'Secure Checkout', path: '/checkout' }]} />
 
-        <div className="flex items-center gap-2 mt-6 mb-10">
+        <div className="aura-route-hero aura-route-hero--compact flex items-center gap-3 mt-6 mb-10">
           <Lock size={20} className="text-[#D4AF37]" />
           <h1 className="text-3xl font-bold text-[#382135]" style={{ fontFamily: '"Playfair Display", serif' }}>
             Secure Checkout

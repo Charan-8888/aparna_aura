@@ -14,7 +14,7 @@ const Textarea = forwardRef(({
   return (
     <div className={`w-full ${className}`}>
       {label && (
-        <label htmlFor={textareaId} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        <label htmlFor={textareaId} className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#5f5651] mb-2">
           {label}
         </label>
       )}
@@ -23,7 +23,7 @@ const Textarea = forwardRef(({
         id={textareaId}
         rows={rows}
         className={`
-          flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm placeholder:text-gray-400 
+          flex w-full rounded-[14px] border border-[#ded2c1] bg-white/95 px-4 py-3 text-sm placeholder:text-gray-400 shadow-[0_8px_24px_rgba(48,27,47,0.035)] 
           focus:outline-none focus:ring-2 focus:ring-[#382135] focus:border-transparent
           disabled:cursor-not-allowed disabled:opacity-50
           dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 dark:focus:ring-[#D4AF37]

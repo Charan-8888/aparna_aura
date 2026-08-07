@@ -180,7 +180,7 @@ const Addresses = () => {
 
   return (
     <div className="container-default section-padding pb-24">
-      <div className="flex items-center justify-between mb-8">
+      <div className="aura-route-hero aura-route-hero--compact flex items-center justify-between mb-8">
         <SectionTitle title="My Addresses" />
         {!showForm && (
           <button 

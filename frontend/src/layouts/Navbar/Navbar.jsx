@@ -1,10 +1,22 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  ChevronDown,
+  Heart,
+  LogOut,
+  MapPin,
+  Menu,
+  Package,
+  Search,
+  ShoppingBag,
+  Sparkles,
+  User,
+  X,
+} from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ShoppingBag, Heart, User, Menu, X, LogOut, Package, ChevronDown, MapPin, Sparkles } from 'lucide-react';
-import { MAIN_NAV_LINKS } from '../../constants/navigation';
-import { APP_NAME } from '../../constants/app';
 import SearchOverlay from '../../components/SearchOverlay/SearchOverlay';
+import { APP_NAME } from '../../constants/app';
+import { MAIN_NAV_LINKS } from '../../constants/navigation';
 import { useAuth } from '../../hooks/useAuth';
 import { useCart } from '../../hooks/useCart';
 import { useWishlist } from '../../hooks/useWishlist';
@@ -17,45 +29,48 @@ const Navbar = () => {
   const [showAnnouncement, setShowAnnouncement] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
+  const dropdownRef = useRef(null);
   const { currentUser, isAuthenticated, logout } = useAuth();
   const { itemCount } = useCart();
   const { wishlistCount } = useWishlist();
-  const dropdownRef = useRef(null);
 
-  // Derive initials for avatar
+  const isHome = location.pathname === '/';
+  const darkHeader = isHome && !isScrolled;
+  const foreground = darkHeader ? 'text-white/72 hover:text-[#e8c36f]' : 'text-[#5d5451] hover:text-[#2c1a2b]';
+  const iconForeground = darkHeader ? 'text-white/78 hover:text-[#e8c36f] hover:bg-white/6' : 'text-[#5d5451] hover:text-[#2c1a2b] hover:bg-[#f5efe7]';
+
   const initials = currentUser
     ? [currentUser.first_name, currentUser.last_name]
         .filter(Boolean)
-        .map((n) => n[0])
+        .map((name) => name[0])
         .join('')
         .toUpperCase()
         .slice(0, 2) || currentUser.email?.[0]?.toUpperCase() || 'U'
     : '';
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    const handleScroll = () => setIsScrolled(window.scrollY > 24);
+    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setIsMobileMenuOpen(false);
     setIsUserDropdownOpen(false);
   }, [location.pathname]);
 
-  // Close dropdown on outside click
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+    const handleOutsideClick = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsUserDropdownOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
-  const handleSearchClose = useCallback(() => setIsSearchOpen(false), []);
+  const closeSearch = useCallback(() => setIsSearchOpen(false), []);
 
   const handleLogout = async () => {
     setIsUserDropdownOpen(false);
@@ -66,27 +81,26 @@ const Navbar = () => {
 
   return (
     <>
-      {/* ── Announcement Bar ── */}
       <AnimatePresence>
         {showAnnouncement && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
+            animate={{ height: 38, opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed top-0 left-0 right-0 z-50 bg-[#382135] overflow-hidden"
+            className="fixed inset-x-0 top-0 z-[60] overflow-hidden border-b border-[#d0aa59]/15 bg-[#2c1429]"
           >
-            <div className="relative flex items-center justify-center px-4 py-2">
-              <div className="flex items-center gap-2 text-xs sm:text-sm text-white/90 font-medium tracking-wide">
-                <Sparkles size={14} className="text-[#D4AF37] flex-shrink-0" />
-                <span className="hidden sm:inline">Free Insured Shipping on Orders Over ₹5,000</span>
-                <span className="sm:hidden">Free Shipping Over ₹5,000</span>
-                <span className="text-white/30 mx-2">|</span>
-                <span className="text-[#D4AF37]">Certified Authentic Jewellery</span>
+            <div className="relative mx-auto flex h-[38px] max-w-[1480px] items-center justify-center px-10">
+              <div className="flex items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/76 sm:text-xs">
+                <Sparkles size={13} className="text-[#e2bd67]" />
+                <span className="hidden sm:inline">Free insured shipping on orders over ₹5,000</span>
+                <span className="sm:hidden">Free shipping over ₹5,000</span>
+                <span className="h-4 w-px bg-white/20" />
+                <span className="text-[#e2bd67]">Certified authentic jewellery</span>
               </div>
               <button
+                type="button"
                 onClick={() => setShowAnnouncement(false)}
-                className="absolute right-3 p-1 text-white/40 hover:text-white transition-colors"
+                className="absolute right-4 rounded-full p-1.5 text-white/35 transition hover:bg-white/5 hover:text-white"
                 aria-label="Close announcement"
               >
                 <X size={14} />
@@ -97,305 +111,191 @@ const Navbar = () => {
       </AnimatePresence>
 
       <header
-        className={`fixed left-0 right-0 z-40 transition-all duration-500 ${
-          showAnnouncement ? 'top-[36px]' : 'top-0'
-        } ${
-          isScrolled
-            ? 'bg-white/98 backdrop-blur-xl shadow-[0_1px_20px_rgba(0,0,0,0.06)] py-3'
-            : 'bg-white/90 backdrop-blur-md py-4'
+        className={`fixed inset-x-0 z-50 transition-all duration-400 ${showAnnouncement ? 'top-[38px]' : 'top-0'} ${
+          darkHeader
+            ? 'border-b border-[#d2aa55]/20 bg-[#060607]/88 py-4 backdrop-blur-xl'
+            : 'border-b border-[#2f1b2d]/8 bg-[#fffdf8]/96 py-3 shadow-[0_10px_35px_rgba(35,22,31,.07)] backdrop-blur-xl'
         }`}
       >
-        {/* Gold accent line */}
-        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#D4AF37]/30 to-transparent" />
+        <div className="mx-auto flex max-w-[1480px] items-center justify-between px-5 sm:px-8 lg:px-12 xl:px-16">
+          <Link to="/" className="group relative z-50 flex items-center gap-3">
+            <span
+              className={`text-[1.75rem] font-medium tracking-[0.025em] transition-colors md:text-[2rem] ${
+                darkHeader ? 'text-[#efcd7c]' : 'text-[#321d30]'
+              }`}
+              style={{ fontFamily: '"Playfair Display", serif' }}
+            >
+              {APP_NAME}
+            </span>
+            <span className="-mt-5 text-[#d9ad50]">✦</span>
+          </Link>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
-            {/* Logo */}
-            <Link to="/" className="flex-shrink-0 z-50 group">
-              <span className="text-2xl font-bold tracking-wider text-[#382135] transition-colors duration-300 group-hover:text-[#D4AF37]" style={{ fontFamily: '"Playfair Display", serif' }}>
-                {APP_NAME}
-              </span>
+          <nav className="hidden items-center gap-8 lg:flex xl:gap-10" aria-label="Primary navigation">
+            {MAIN_NAV_LINKS.map((link) => {
+              const active = location.pathname === link.path || (link.path !== '/' && location.pathname.startsWith(link.path));
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`group relative py-2 text-[13px] font-semibold tracking-[0.04em] transition ${
+                    active ? (darkHeader ? 'text-[#e8c36f]' : 'text-[#2f1b2d]') : foreground
+                  }`}
+                >
+                  {link.label}
+                  <span
+                    className={`absolute inset-x-0 -bottom-1 mx-auto h-px bg-[#d1a64e] transition-all duration-300 ${
+                      active ? 'w-full' : 'w-0 group-hover:w-full'
+                    }`}
+                  />
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="hidden items-center gap-1 md:flex">
+            <button type="button" onClick={() => setIsSearchOpen(true)} className={`rounded-full p-2.5 transition ${iconForeground}`} aria-label="Search">
+              <Search size={19} strokeWidth={1.7} />
+            </button>
+            <Link to="/wishlist" className={`relative rounded-full p-2.5 transition ${iconForeground}`} aria-label="Wishlist">
+              <Heart size={19} strokeWidth={1.7} />
+              {isAuthenticated && wishlistCount > 0 && (
+                <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#d9ad50] px-1 text-[9px] font-bold text-[#21111f]">
+                  {wishlistCount > 9 ? '9+' : wishlistCount}
+                </span>
+              )}
+            </Link>
+            <Link to="/cart" className={`relative rounded-full p-2.5 transition ${iconForeground}`} aria-label="Shopping bag">
+              <ShoppingBag size={19} strokeWidth={1.7} />
+              {itemCount > 0 && (
+                <span className="absolute right-0 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#d9ad50] px-1 text-[9px] font-bold text-[#21111f]">
+                  {itemCount > 9 ? '9+' : itemCount}
+                </span>
+              )}
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-8">
-              {MAIN_NAV_LINKS.map((link) => {
-                const isActive = location.pathname === link.path ||
-                  (link.path !== '/' && location.pathname.startsWith(link.path));
-                return (
-                  <Link
-                    key={link.path}
-                    to={link.path}
-                    className={`text-sm font-medium transition-colors relative group ${
-                      isActive ? 'text-[#382135]' : 'text-gray-500 hover:text-[#382135]'
-                    }`}
-                  >
-                    {link.label}
-                    <span className={`absolute -bottom-1 left-0 h-0.5 bg-[#D4AF37] transition-all duration-300 ${
-                      isActive ? 'w-full' : 'w-0 group-hover:w-full'
-                    }`} />
-                  </Link>
-                );
-              })}
-            </nav>
+            {isAuthenticated ? (
+              <div ref={dropdownRef} className="relative ml-2">
+                <button
+                  type="button"
+                  onClick={() => setIsUserDropdownOpen((open) => !open)}
+                  className={`flex items-center gap-2 rounded-full border px-2 py-1.5 transition ${
+                    darkHeader ? 'border-white/12 bg-white/5 text-white' : 'border-[#2f1b2d]/10 bg-[#f7f2ea] text-[#2f1b2d]'
+                  }`}
+                >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#3a2136] text-xs font-bold text-[#efcd7c]">{initials}</span>
+                  <ChevronDown size={13} className={`transition-transform ${isUserDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
 
-            {/* Desktop Icons */}
-            <div className="hidden md:flex items-center space-x-1">
-              <button
-                onClick={() => setIsSearchOpen(true)}
-                className="p-2.5 text-gray-500 hover:text-[#382135] transition-colors rounded-full hover:bg-gray-50"
-                aria-label="Search"
-              >
-                <Search size={20} />
-              </button>
-              <Link to="/wishlist" className="p-2.5 text-gray-500 hover:text-[#382135] transition-colors rounded-full hover:bg-gray-50 relative" aria-label="Wishlist">
-                <Heart size={20} />
-                {isAuthenticated && wishlistCount > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute top-0.5 right-0.5 bg-red-500 text-[10px] text-white font-bold rounded-full w-4 h-4 flex items-center justify-center"
-                  >
-                    {wishlistCount > 9 ? '9+' : wishlistCount}
-                  </motion.span>
-                )}
-              </Link>
-              <Link to="/cart" className="p-2.5 text-gray-500 hover:text-[#382135] transition-colors rounded-full hover:bg-gray-50 relative" aria-label="Cart">
-                <ShoppingBag size={20} />
-                {itemCount > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute top-0.5 right-0.5 bg-[#D4AF37] text-[10px] text-[#382135] font-bold rounded-full w-4 h-4 flex items-center justify-center"
-                  >
-                    {itemCount > 9 ? '9+' : itemCount}
-                  </motion.span>
-                )}
-              </Link>
-
-              {/* Auth Section */}
-              {isAuthenticated ? (
-                /* ── Authenticated: Avatar + Dropdown ── */
-                <div className="relative" ref={dropdownRef}>
-                  <button
-                    onClick={() => setIsUserDropdownOpen((s) => !s)}
-                    className="flex items-center gap-1.5 ml-1 pl-2 pr-1 py-1 rounded-full hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#382135] to-[#4D2C48] text-white text-xs font-bold flex items-center justify-center ring-2 ring-[#D4AF37]/20">
-                      {initials}
-                    </div>
-                    <ChevronDown
-                      size={14}
-                      className={`text-gray-400 transition-transform duration-200 ${isUserDropdownOpen ? 'rotate-180' : ''}`}
-                    />
-                  </button>
-
-                  <AnimatePresence>
-                    {isUserDropdownOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 8, scale: 0.97 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 8, scale: 0.97 }}
-                        transition={{ duration: 0.15 }}
-                        className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 overflow-hidden"
-                      >
-                        {/* User info */}
-                        <div className="px-4 py-3 border-b border-gray-50">
-                          <p className="text-xs font-semibold text-[#382135] truncate">
-                            {[currentUser.first_name, currentUser.last_name].filter(Boolean).join(' ') || 'Member'}
-                          </p>
-                          <p className="text-xs text-gray-400 truncate">{currentUser.email}</p>
-                        </div>
-                        <div className="py-1">
-                          <Link
-                            to="/profile"
-                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-[#FAF8F6] hover:text-[#382135] transition-colors"
-                          >
-                            <User size={15} className="text-[#D4AF37]" />
-                            My Profile
-                          </Link>
-                          <Link
-                            to="/orders"
-                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-[#FAF8F6] hover:text-[#382135] transition-colors"
-                          >
-                            <Package size={15} className="text-[#D4AF37]" />
-                            My Orders
-                          </Link>
-                          <Link
-                            to="/addresses"
-                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-[#FAF8F6] hover:text-[#382135] transition-colors"
-                          >
-                            <MapPin size={15} className="text-[#D4AF37]" />
-                            My Addresses
-                          </Link>
-                          <hr className="my-1 border-gray-50" />
-                          <button
-                            onClick={handleLogout}
-                            className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                          >
-                            <LogOut size={15} />
-                            Sign Out
-                          </button>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ) : (
-                /* ── Guest: Login + Register buttons ── */
-                <div className="flex items-center gap-2 ml-2">
-                  <Link
-                    to="/login"
-                    className="text-sm font-medium text-gray-600 hover:text-[#382135] px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="text-sm font-semibold bg-[#382135] text-white px-5 py-2 rounded-full hover:bg-[#2a1827] transition-all duration-300 hover:shadow-md"
-                  >
-                    Register
-                  </Link>
-                </div>
-              )}
-            </div>
-
-            {/* Mobile Icons */}
-            <div className="flex md:hidden items-center gap-1">
-              <button onClick={() => setIsSearchOpen(true)} className="p-2 text-gray-600" aria-label="Search">
-                <Search size={20} />
-              </button>
-              <Link to="/cart" className="p-2 text-gray-600 relative" aria-label="Cart">
-                <ShoppingBag size={20} />
-                {itemCount > 0 && (
-                  <span className="absolute top-0.5 right-0.5 bg-[#D4AF37] text-[10px] text-[#382135] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                    {itemCount > 9 ? '9+' : itemCount}
-                  </span>
-                )}
-              </Link>
-              <button
-                className="p-2 z-50 text-gray-600"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                aria-label="Toggle menu"
-              >
-                <AnimatePresence mode="wait" initial={false}>
-                  {isMobileMenuOpen ? (
-                    <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
-                      <X size={24} />
-                    </motion.div>
-                  ) : (
-                    <motion.div key="menu" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
-                      <Menu size={24} />
+                <AnimatePresence>
+                  {isUserDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.97 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.97 }}
+                      className="absolute right-0 top-full mt-3 w-60 overflow-hidden rounded-2xl border border-[#2f1b2d]/8 bg-[#fffdf9] py-2 shadow-[0_25px_70px_rgba(37,20,35,.18)]"
+                    >
+                      <div className="border-b border-[#2f1b2d]/8 px-4 py-3">
+                        <p className="truncate text-sm font-semibold text-[#2f1b2d]">{[currentUser.first_name, currentUser.last_name].filter(Boolean).join(' ') || 'Member'}</p>
+                        <p className="truncate text-xs text-[#8a7e79]">{currentUser.email}</p>
+                      </div>
+                      {[
+                        { to: '/profile', icon: User, label: 'My Profile' },
+                        { to: '/orders', icon: Package, label: 'My Orders' },
+                        { to: '/addresses', icon: MapPin, label: 'My Addresses' },
+                      ].map(({ to, icon: Icon, label }) => (
+                        <Link key={to} to={to} className="flex items-center gap-3 px-4 py-3 text-sm text-[#675c58] transition hover:bg-[#f5efe7] hover:text-[#2f1b2d]">
+                          <Icon size={15} className="text-[#bd8731]" /> {label}
+                        </Link>
+                      ))}
+                      <button type="button" onClick={handleLogout} className="flex w-full items-center gap-3 border-t border-[#2f1b2d]/8 px-4 py-3 text-sm text-red-600 transition hover:bg-red-50">
+                        <LogOut size={15} /> Sign Out
+                      </button>
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </button>
-            </div>
+              </div>
+            ) : (
+              <div className="ml-3 flex items-center gap-2">
+                <Link to="/login" className={`px-3 py-2 text-sm font-semibold transition ${darkHeader ? 'text-white/75 hover:text-white' : 'text-[#645955] hover:text-[#2f1b2d]'}`}>
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  className="rounded-full bg-[linear-gradient(135deg,#efd18a,#bd8731)] px-5 py-2.5 text-sm font-bold text-[#23131f] shadow-[0_10px_28px_rgba(189,135,49,.18)] transition hover:-translate-y-0.5 hover:brightness-105"
+                >
+                  Register
+                </Link>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1 md:hidden">
+            <button type="button" onClick={() => setIsSearchOpen(true)} className={`rounded-full p-2 ${iconForeground}`} aria-label="Search">
+              <Search size={20} />
+            </button>
+            <Link to="/cart" className={`relative rounded-full p-2 ${iconForeground}`} aria-label="Shopping bag">
+              <ShoppingBag size={20} />
+              {itemCount > 0 && <span className="absolute right-0 top-0 h-4 min-w-4 rounded-full bg-[#d9ad50] px-1 text-center text-[9px] font-bold text-[#21111f]">{itemCount > 9 ? '9+' : itemCount}</span>}
+            </Link>
+            <button type="button" onClick={() => setIsMobileMenuOpen((open) => !open)} className={`relative z-50 rounded-full p-2 ${iconForeground}`} aria-label="Toggle navigation menu">
+              {isMobileMenuOpen ? <X size={23} /> : <Menu size={23} />}
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Mobile Drawer */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
-            <motion.div
+            <motion.button
+              type="button"
+              aria-label="Close navigation menu"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileMenuOpen(false)}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 md:hidden"
+              className="fixed inset-0 z-40 bg-black/65 backdrop-blur-sm md:hidden"
             />
-            <motion.div
+            <motion.aside
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
-              className="fixed top-0 right-0 bottom-0 w-[80%] max-w-sm bg-white z-40 shadow-2xl flex flex-col md:hidden"
+              transition={{ type: 'spring', bounce: 0, duration: 0.45 }}
+              className="fixed bottom-0 right-0 top-0 z-50 flex w-[86%] max-w-sm flex-col bg-[#fffdf9] shadow-2xl md:hidden"
             >
-              {/* Drawer Header */}
-              <div className="p-6 pt-20 border-b border-gray-100">
-                {isAuthenticated ? (
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#382135] to-[#4D2C48] text-white text-sm font-bold flex items-center justify-center ring-2 ring-[#D4AF37]/20">
-                      {initials}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-[#382135]">
-                        {[currentUser.first_name, currentUser.last_name].filter(Boolean).join(' ') || 'Member'}
-                      </p>
-                      <p className="text-xs text-gray-400">{currentUser.email}</p>
-                    </div>
-                  </div>
-                ) : (
-                  <span className="text-xl font-bold text-[#382135]" style={{ fontFamily: '"Playfair Display", serif' }}>
-                    {APP_NAME}
-                  </span>
-                )}
+              <div className="border-b border-[#2f1b2d]/8 px-6 pb-6 pt-24">
+                <p className="font-heading text-3xl text-[#2f1b2d]">{APP_NAME}</p>
+                <p className="mt-2 text-xs uppercase tracking-[0.2em] text-[#a77d32]">Fine jewellery, thoughtfully made</p>
               </div>
-
-              {/* Nav Links */}
-              <nav className="flex-1 py-6 px-6 space-y-1 overflow-y-auto">
-                {MAIN_NAV_LINKS.map((link, i) => (
-                  <motion.div
-                    key={link.path}
-                    initial={{ x: 50, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: i * 0.08 }}
-                  >
-                    <Link
-                      to={link.path}
-                      className="flex items-center py-3 px-3 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-[#382135] font-medium transition-colors"
-                    >
-                      {link.label}
+              <nav className="flex-1 space-y-1 overflow-y-auto px-5 py-6">
+                {MAIN_NAV_LINKS.map((link, index) => (
+                  <motion.div key={link.path} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.05 }}>
+                    <Link to={link.path} className="flex items-center justify-between rounded-xl px-4 py-3.5 text-base font-medium text-[#4f4440] transition hover:bg-[#f4ede4] hover:text-[#2f1b2d]">
+                      {link.label}<span className="text-[#bd8731]">→</span>
                     </Link>
                   </motion.div>
                 ))}
               </nav>
-
-              {/* Drawer Footer */}
-              <div className="p-6 border-t border-gray-100">
+              <div className="border-t border-[#2f1b2d]/8 p-6">
                 {isAuthenticated ? (
-                  <div className="grid grid-cols-3 gap-4">
-                    <Link to="/wishlist" onClick={() => setIsMobileMenuOpen(false)} className="flex flex-col items-center text-gray-500 hover:text-[#D4AF37] transition-colors">
-                      <Heart size={22} className="mb-1" />
-                      <span className="text-[11px]">Wishlist</span>
-                    </Link>
-                    <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="flex flex-col items-center text-gray-500 hover:text-[#D4AF37] transition-colors">
-                      <User size={22} className="mb-1" />
-                      <span className="text-[11px]">Profile</span>
-                    </Link>
-                    <button onClick={handleLogout} className="flex flex-col items-center text-red-500 hover:text-red-700 transition-colors">
-                      <LogOut size={22} className="mb-1" />
-                      <span className="text-[11px]">Sign Out</span>
-                    </button>
+                  <div className="grid grid-cols-3 gap-3 text-center text-xs">
+                    <Link to="/wishlist" className="rounded-xl bg-[#f5efe7] p-3 text-[#5f5450]"><Heart size={20} className="mx-auto mb-1" />Wishlist</Link>
+                    <Link to="/profile" className="rounded-xl bg-[#f5efe7] p-3 text-[#5f5450]"><User size={20} className="mx-auto mb-1" />Profile</Link>
+                    <button type="button" onClick={handleLogout} className="rounded-xl bg-red-50 p-3 text-red-600"><LogOut size={20} className="mx-auto mb-1" />Sign out</button>
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-3">
-                    <Link
-                      to="/login"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-center py-2.5 border border-[#382135] text-[#382135] rounded-full text-sm font-semibold hover:bg-gray-50 transition-colors"
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      to="/register"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-center py-2.5 bg-[#382135] text-white rounded-full text-sm font-semibold hover:bg-[#2a1827] transition-colors"
-                    >
-                      Register
-                    </Link>
+                    <Link to="/login" className="rounded-full border border-[#2f1b2d]/25 px-4 py-3 text-center text-sm font-semibold text-[#2f1b2d]">Login</Link>
+                    <Link to="/register" className="rounded-full bg-[#2f1b2d] px-4 py-3 text-center text-sm font-semibold text-white">Register</Link>
                   </div>
                 )}
               </div>
-            </motion.div>
+            </motion.aside>
           </>
         )}
       </AnimatePresence>
 
-      {/* Search Overlay */}
-      <SearchOverlay isOpen={isSearchOpen} onClose={handleSearchClose} />
+      <SearchOverlay isOpen={isSearchOpen} onClose={closeSearch} />
     </>
   );
 };

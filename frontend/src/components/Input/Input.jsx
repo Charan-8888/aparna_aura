@@ -29,8 +29,8 @@ const Input = forwardRef(({
           type={type}
           className={`
             w-full ${Icon ? 'pl-10' : 'pl-4'} pr-4 py-3 
-            rounded-[3px] border border-[#E7DFD3] bg-white text-[#1A1A1A] text-sm
-            shadow-none transition-all duration-300
+            rounded-[14px] border border-[#ded2c1] bg-white/95 text-[#1A1A1A] text-sm
+            shadow-[0_8px_24px_rgba(48,27,47,0.035)] transition-all duration-300
             placeholder:text-[#8A8A8A]
             focus:outline-none focus:ring-2 focus:ring-[#C9A227] focus:border-transparent
             disabled:cursor-not-allowed disabled:opacity-50

@@ -15,7 +15,7 @@ const Select = forwardRef(({
   return (
     <div className={`w-full ${className}`}>
       {label && (
-        <label htmlFor={selectId} className="block text-sm font-medium text-[#2C2C2C] mb-1.5">
+        <label htmlFor={selectId} className="block text-[11px] font-bold uppercase tracking-[0.12em] text-[#5f5651] mb-2">
           {label}
         </label>
       )}
@@ -25,8 +25,8 @@ const Select = forwardRef(({
           id={selectId}
           className={`
             appearance-none w-full pl-4 pr-10 py-3 
-            rounded-[12px] border border-[#E6E1D8] bg-[#FAF8F5] text-[#1A1A1A] text-sm
-            shadow-sm transition-all duration-300 cursor-pointer
+            rounded-[14px] border border-[#ded2c1] bg-white/95 text-[#1A1A1A] text-sm
+            shadow-[0_8px_24px_rgba(48,27,47,0.035)] transition-all duration-300 cursor-pointer
             focus:outline-none focus:ring-2 focus:ring-[#C9A227] focus:border-transparent
             disabled:cursor-not-allowed disabled:opacity-50
             dark:bg-[#121212] dark:border-gray-700 dark:text-[#F8F8F8]

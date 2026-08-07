@@ -131,7 +131,7 @@ const Payment = () => {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pb-24">
-      <div className="text-center mb-10">
+      <div className="aura-route-hero aura-route-hero--center mb-10">
         <h1 className="text-3xl font-bold text-[#382135] mb-2">Complete Payment</h1>
         <p className="text-gray-500">Choose your preferred payment method</p>
       </div>
