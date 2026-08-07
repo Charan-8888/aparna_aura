@@ -67,7 +67,8 @@ class LogoutView(views.APIView):
     
     def post(self, request):
         try:
-            refresh_token = request.data.get("refresh_token")
+            # Frontend sends the key as 'refresh' (simplejwt convention)
+            refresh_token = request.data.get("refresh")
             if refresh_token:
                 token = RefreshToken(refresh_token)
                 if str(token.get('user_id')) != str(request.user.id):
