@@ -5,8 +5,8 @@ from .models import Transaction
 @admin.register(Transaction)
 class TransactionAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'order', 'payment_method', 'payment_gateway',
-        'status', 'amount', 'razorpay_order_id', 'created_at',
+        'transaction_id', 'order', 'user_email', 'amount',
+        'payment_method', 'status', 'created_at',
     )
     list_filter = ('status', 'payment_method', 'payment_gateway', 'created_at')
     search_fields = (
@@ -18,8 +18,15 @@ class TransactionAdmin(admin.ModelAdmin):
         'razorpay_order_id', 'razorpay_payment_id', 'razorpay_signature',
         'amount', 'response_payload', 'created_at', 'updated_at',
     )
-    list_select_related = ('order',)
+    list_select_related = ('order', 'order__user')
     ordering = ('-created_at',)
+
+    def user_email(self, obj):
+        if obj.order and obj.order.user:
+            return obj.order.user.email
+        return "—"
+    user_email.short_description = 'Customer'
+    user_email.admin_order_field = 'order__user__email'
 
     def get_readonly_fields(self, request, obj=None):
         """Make every field readonly once the transaction has succeeded."""

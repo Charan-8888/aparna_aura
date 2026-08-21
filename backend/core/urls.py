@@ -12,6 +12,10 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
+admin.site.site_header = "APARNA AURA"
+admin.site.site_title = "Aparna Aura Admin"
+admin.site.index_title = "Jewellery Store Management"
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 

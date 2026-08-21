@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from .models import Order, OrderItem
 
 class OrderItemInline(admin.TabularInline):
@@ -9,11 +10,50 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'status', 'total_amount', 'created_at')
-    list_filter = ('status', 'created_at')
-    search_fields = ('user__email', 'id')
+    list_display = ('id', 'user_email', 'total_amount', 'payment_method_display', 'payment_status_display', 'status_badge', 'created_at')
+    list_filter = ('status', 'transaction__status', 'created_at')
+    search_fields = ('user__email', 'user__first_name', 'user__last_name', 'id')
     readonly_fields = ('user', 'subtotal', 'tax_amount', 'shipping_fee', 'discount_amount', 'total_amount', 'shipping_address', 'billing_address', 'created_at', 'updated_at')
     inlines = [OrderItemInline]
+    ordering = ('-created_at',)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('user', 'shipping_address', 'billing_address', 'transaction')
+
+    def user_email(self, obj):
+        return obj.user.email
+    user_email.short_description = 'Customer'
+    user_email.admin_order_field = 'user__email'
+
+    def payment_method_display(self, obj):
+        if hasattr(obj, 'transaction'):
+            return obj.transaction.get_payment_method_display()
+        return "—"
+    payment_method_display.short_description = 'Payment Method'
+
+    def payment_status_display(self, obj):
+        if hasattr(obj, 'transaction'):
+            status = obj.transaction.status
+            color_map = {'success': 'badge-success', 'pending': 'badge-warning', 'failed': 'badge-danger'}
+            css_class = color_map.get(status, 'badge-neutral')
+            return format_html('<span class="admin-status-badge {}">{}</span>', css_class, obj.transaction.get_status_display())
+        return "—"
+    payment_status_display.short_description = 'Payment Status'
+
+    def status_badge(self, obj):
+        status_colors = {
+            'pending': 'badge-warning',
+            'confirmed': 'badge-info',
+            'processing': 'badge-info',
+            'packed': 'badge-neutral',
+            'shipped': 'badge-neutral',
+            'delivered': 'badge-success',
+            'cancelled': 'badge-danger',
+            'refunded': 'badge-danger'
+        }
+        css_class = status_colors.get(obj.status, 'badge-neutral')
+        return format_html('<span class="admin-status-badge {}">{}</span>', css_class, obj.get_status_display())
+    status_badge.short_description = 'Order Status'
 
     def get_readonly_fields(self, request, obj=None):
         if obj and obj.status in ['cancelled', 'delivered', 'refunded']:
@@ -25,3 +65,6 @@ class OrderItemAdmin(admin.ModelAdmin):
     list_display = ('id', 'order', 'product', 'quantity', 'unit_price')
     search_fields = ('order__id', 'product__name')
     readonly_fields = ('order', 'product', 'quantity', 'unit_price')
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('order', 'product')
